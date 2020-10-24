@@ -13,7 +13,7 @@
 #include "SCA_Protocol.h"
 
 /* 参数配置 */
-#define SCA_NUM_USE		2			//当前使用SCA的数量,1-255
+#define SCA_NUM_USE		4			//当前使用SCA的数量,1-255
 #define SCA_DEBUGER		1			//使能调试接口
 #define CanOvertime		0xFFFF		//数据阻塞超时（180MHZ）
 #define CanPowertime	0xFFFFFF	//开关机阻塞超时（180MHZ）

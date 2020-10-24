@@ -39,13 +39,8 @@ void SCA_Lookup()
 	CAN_Port1.Retry = 2;			//失败重发次数
 	CAN_Port1.Send = CAN1_Send_Msg;	//CAN1端口发送函数
 	
-	CAN_Port2.CanPort = 2;			
-	CAN_Port2.Retry = 2;			
-	CAN_Port2.Send = CAN2_Send_Msg;	//CAN2端口发送函数
-	
 	/* 调用函数查找对应总线上存在的ID */
 	lookupActuators(&CAN_Port1);	//轮询CAN1总线
-	lookupActuators(&CAN_Port2);	//轮询CAN2总线
 }
 
 /**
@@ -59,18 +54,15 @@ void SCA_Init()
 	CAN_Port1.CanPort = 1;			//标记端口号
 	CAN_Port1.Retry = 2;			//失败重发次数
 	CAN_Port1.Send = CAN1_Send_Msg;	//CAN1端口发送函数
-	
-	CAN_Port2.CanPort = 2;			
-	CAN_Port2.Retry = 2;			
-	CAN_Port2.Send = CAN2_Send_Msg;	//CAN2端口发送函数
+
 	
 	/* 装载执行器的ID与所使用的CAN端口号 */
 	setupActuators( 1, &CAN_Port1);	//ID1 绑定CAN1
-	setupActuators( 2, &CAN_Port2);	//ID2 绑定CAN2
-	
+	setupActuators( 2, &CAN_Port1);	//ID2 绑定CAN1
+	setupActuators( 3, &CAN_Port1);	//ID3 绑定CAN1
+	setupActuators( 4, &CAN_Port1);	//ID4 绑定CAN1
 	/* 获取ID1和2的参数句柄 */
 	pSCA_ID1 = getInstance(1);
-	pSCA_ID2 = getInstance(2);
 	
 	/* 启动所有执行器 */
 	enableAllActuators();

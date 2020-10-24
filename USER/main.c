@@ -6,14 +6,17 @@
   * @日	期 ： 2019.9.10
   * @摘	要 ： 主程序入口
   ******************************************************************************/
-  
+
 /* Includes ----------------------------------------------------------------------*/
 #include "bsp.h"
 #include "SCA_API.h"
 #include "SCA_APP.h"
+#include "main.h"
+#include "timer.h"
 
 /* Variable defines --------------------------------------------------------------*/
-uint8_t cmd = 0;					//外部控制命令
+uint8_t cmd = 0; //外部控制命令
+unsigned char total_motor_number = 0;
 
 /* Forward Declaration -----------------------------------------------------------*/
 static void Log(void);
@@ -25,27 +28,31 @@ static void CMD_Handler(uint8_t cmd);
   * @返	回	无
   */
 int main(void)
-{ 
+{
 	/* 底层驱动初始化 */
-	BSP_Init();			
+	BSP_Init();
 
 	/* 等待执行器稳定 */
-	delay_ms(500);	
-	
+	delay_ms(500);
+
 	/* 串口1打印LOG信息 */
 	Log();
 	
+	TIM2_init(50000-1,9000-1);
+
 	/* 等待命令传入 */
-	while(1)
-	{	
-		if(cmd)
+	while (1)
+	{
+		if (cmd)
 		{
 			CMD_Handler(cmd);
 			cmd = 0;
 		}
 		else
 			delay_ms(10);
-	}       
+
+		delay_ms(1000);
+	}
 }
 
 /**
@@ -73,76 +80,122 @@ static void Log()
   */
 static void CMD_Handler(uint8_t cmd)
 {
-	switch(cmd)
+	switch (cmd)
 	{
-		case 1:
-			printf("\r\n执行轮询程序！\r\n");
-		
-			/* 调用轮询程序 */
-			SCA_Lookup();
-		
-			printf("轮询结束！\r\n");
+	case 1:
+	{
+		printf("\r\n执行轮询程序！\r\n");
+
+		/* 调用轮询程序 */
+		SCA_Lookup();
+
+		printf("轮询结束！\r\n");
 		break;
-		
-		case 2:
-			printf("\r\nSCA初始化！\r\n");
-		
-			/* 调用初始化程序 */
-			SCA_Init();
-		
-			/* 等待执行器稳定 */
-			delay_ms(500);
-		
-			printf("SCA初始化结束！\r\n");
-			break;
-		
-		case 3:
-			printf("\r\n进入位置归零测试！\r\n");
-		
-			/* 调用测试程序 位置归零 */
-			SCA_Homing();
-		
-			printf("位置归零测试结束！\r\n");
-			break;
-			
-		case 4:
-			printf("\r\n进入正反转切换测试！\r\n");
-		
-			/* 调用测试程序 正反转切换 */
-			SCA_Exp1();
-		
-			printf("正反转切换测试结束！\r\n");
-			break;
-		
-		case 5:
-			printf("\r\n进入高低速切换测试！\r\n");
-			
-			/* 调用测试程序 高低速切换 */
-			SCA_Exp2();
-		
-			printf("高低速切换测试结束！\r\n");
-			break;
-		
-		case 6:
-			printf("\r\n执行器关机！\r\n");
-			
-			/* 关闭所有执行器 */
-			disableAllActuators();
-		
-			printf("执行器关机结束！\r\n");
-			break;
-		
-		default:
-			Log();
-			break;
 	}
-	
+
+	case 2:
+	{
+		printf("\r\nSCA初始化！\r\n");
+
+		/* 调用初始化程序 */
+		SCA_Init();
+
+		/* 等待执行器稳定 */
+		delay_ms(500);
+
+		printf("SCA初始化结束！\r\n");
+		break;
+	}
+
+	case 3:
+	{
+		printf("\r\n进入位置归零测试！\r\n");
+
+		/* 调用测试程序 位置归零 */
+		SCA_Homing();
+
+		printf("位置归零测试结束！\r\n");
+		break;
+	}
+
+	case 4:
+	{
+		printf("\r\n进入正反转切换测试！\r\n");
+
+		/* 调用测试程序 正反转切换 */
+		SCA_Exp1();
+
+		printf("正反转切换测试结束！\r\n");
+		break;
+	}
+
+	case 5:
+	{
+		printf("\r\n进入高低速切换测试！\r\n");
+
+		/* 调用测试程序 高低速切换 */
+		SCA_Exp2();
+
+		printf("高低速切换测试结束！\r\n");
+		break;
+	}
+
+	case 6:
+	{
+		printf("\r\n执行器关机！\r\n");
+
+		/* 关闭所有执行器 */
+		disableAllActuators();
+
+		printf("执行器关机结束！\r\n");
+		break;
+	}
+
+	case 10:
+	{
+		printf("start all \n");
+		SCA_Lookup();
+		SCA_Init();
+		delay_ms(1000);
+		break;
+	}
+	case 11:
+	{
+		printf("close all \n");
+		disableAllActuators();
+		break;
+	}
+	case 12:
+	{
+		printf("read 1 motor mode \n");
+		getActuatorMode(1, Block);
+		break;
+	}
+	case 13:
+	{
+		printf("write 1 motor to position mode \n");
+		activateActuatorMode(1, 3, Block);
+		break;
+	}
+	case 14:
+	{
+		SCA_Handler_t *pSCA = NULL;
+		printf(" motor 1 rotate 0.1 R \n");
+		getPosition(1, Block);
+		delay_ms(10);
+
+		/* 获取该ID的信息句柄 */
+		pSCA = getInstance(1);
+		if (pSCA != NULL)
+		{
+			float target = pSCA->Position_Real + 0.1;
+			setPosition(1, target);
+		}
+		break;
+	}
+
+	default:
+		Log();
+		break;
+	}
 }
-
-
-
-
-
-
-
-
