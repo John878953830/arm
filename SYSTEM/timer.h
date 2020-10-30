@@ -8,6 +8,7 @@
 #include "stm32f4xx.h"
 #include "main.h"
 
+extern char timeout_flag;
 void TIM2_init(u16 auto_data, u16 fractional);
 void TIM_init(u16 auto_data, u16 fractional, u8 timer_id);
 

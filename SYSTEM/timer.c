@@ -1,4 +1,5 @@
 #include "timer.h"
+char timeout_flag = 0;
 void TIM2_init(u16 auto_data, u16 fractional)
 {
 
@@ -66,11 +67,14 @@ void TIM2_IRQHandler(void)
         }
         else
         {
+            timeout_flag = 1;
+            /*
             int i = 0;
             for (i = 1; i < 5; i++)
             {
                 getPosition(i, Unblock);
             }
+            */
         }
     }
     TIM_ClearITPendingBit(TIM2, TIM_IT_Update);

@@ -17,10 +17,94 @@
 /* Variable defines --------------------------------------------------------------*/
 uint8_t cmd = 0; //外部控制命令
 unsigned char total_motor_number = 0;
+unsigned char if_error = 0;
 
 /* Forward Declaration -----------------------------------------------------------*/
 static void Log(void);
 static void CMD_Handler(uint8_t cmd);
+char motor_act(size_t id, float step, char dir)
+{
+	SCA_Handler_t *pSCA = NULL;
+	//check system status
+	if (if_error != 0)
+	{
+		return 1;
+	}
+	//check id
+	if (id <= 0 || id > 4)
+	{
+		return 2;
+	}
+	//check step
+	if (step > 0.1)
+	{
+		return 3;
+	}
+	//check dir
+	if (dir != 0 && dir != 1)
+	{
+		return 4;
+	}
+
+	/* 获取该ID的信息句柄 */
+	pSCA = getInstance(id);
+	if (pSCA != NULL)
+	{
+		if (dir == 0)
+		{
+			float target = pSCA->Position_Real + step;
+			setPosition(id, target);
+		}
+		else
+		{
+			float target = pSCA->Position_Real - step;
+			setPosition(id, target);
+		}
+	}
+	else
+	{
+		return 5;
+	}
+
+	return 0;
+}
+
+char update_status(void)
+{
+	char i = 0;
+	if (timeout_flag)
+	{
+		timeout_flag = 0;
+
+		//check id if online
+		for (i = 1; i < 5; i++)
+		{
+			if (isOnline(i, Unblock) == SCA_NoError)
+			{
+				continue;
+			}
+			else
+			{
+				return 10 + i;
+			}
+		}
+		//check if enable
+		//todo
+		//update position
+		for (i = 1; i < 5; i++)
+		{
+			if (getPosition(i, Unblock) == SCA_NoError)
+			{
+				continue;
+			}
+			else
+			{
+				return 20 + i;
+			}
+		}
+	}
+	return 0;
+}
 
 /**
   * @功	能	主程序入口
@@ -37,8 +121,8 @@ int main(void)
 
 	/* 串口1打印LOG信息 */
 	Log();
-	
-	TIM2_init(50000-1,9000-1);
+
+	TIM2_init(100 - 1, 9000 - 1);
 
 	/* 等待命令传入 */
 	while (1)
@@ -51,7 +135,8 @@ int main(void)
 		else
 			delay_ms(10);
 
-		delay_ms(1000);
+		//delay_ms(1000);
+		if_error = update_status();
 	}
 }
 
@@ -175,6 +260,9 @@ static void CMD_Handler(uint8_t cmd)
 	{
 		printf("write 1 motor to position mode \n");
 		activateActuatorMode(1, 3, Block);
+		activateActuatorMode(2, 3, Block);
+		activateActuatorMode(3, 3, Block);
+		activateActuatorMode(4, 3, Block);
 		break;
 	}
 	case 14:
@@ -191,6 +279,46 @@ static void CMD_Handler(uint8_t cmd)
 			float target = pSCA->Position_Real + 0.1;
 			setPosition(1, target);
 		}
+		break;
+	}
+	case 15:
+	{
+		motor_act(4, 0.01, 0);
+		break;
+	}
+	case 16:
+	{
+		motor_act(4, 0.01, 1);
+		break;
+	}
+	case 17:
+	{
+		motor_act(3, 0.01, 0);
+		break;
+	}
+	case 18:
+	{
+		motor_act(3, 0.01, 1);
+		break;
+	}
+	case 19:
+	{
+		motor_act(2, 0.01, 0);
+		break;
+	}
+	case 20:
+	{
+		motor_act(2, 0.01, 1);
+		break;
+	}
+	case 21:
+	{
+		motor_act(1, 0.01, 0);
+		break;
+	}
+	case 22:
+	{
+		motor_act(1, 0.01, 1);
 		break;
 	}
 
