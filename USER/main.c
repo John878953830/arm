@@ -15,9 +15,22 @@
 #include "timer.h"
 
 /* Variable defines --------------------------------------------------------------*/
-uint8_t cmd = 0; //外部控制命令
-unsigned char total_motor_number = 0;
-unsigned char if_error = 0;
+uint8_t cmd = 0;						  //外部控制命令
+unsigned char total_motor_number = 0;	  //save the total motor number
+unsigned char if_error = 0;				  //if the system is alright
+unsigned char if_need_lookup_monitor = 0; //if need to look up
+unsigned char lookup_counter = 0;
+
+/**
+ * @brief timer counter for step
+ */
+unsigned int tim3_counter = 0;
+unsigned int tim4_counter = 0;
+unsigned int tim6_counter = 0;
+unsigned int tim13_counter = 0;
+unsigned int tim14_counter = 0;
+
+MOTOR_PARAMETER mp[5];
 
 /* Forward Declaration -----------------------------------------------------------*/
 static void Log(void);
@@ -36,7 +49,7 @@ char motor_act(size_t id, float step, char dir)
 		return 2;
 	}
 	//check step
-	if (step > 0.1)
+	if (step > 1)
 	{
 		return 3;
 	}
@@ -45,20 +58,17 @@ char motor_act(size_t id, float step, char dir)
 	{
 		return 4;
 	}
-
 	/* 获取该ID的信息句柄 */
 	pSCA = getInstance(id);
 	if (pSCA != NULL)
 	{
 		if (dir == 0)
 		{
-			float target = pSCA->Position_Real + step;
-			setPosition(id, target);
+			setPosition(id, pSCA->Position_Real + step);
 		}
 		else
 		{
-			float target = pSCA->Position_Real - step;
-			setPosition(id, target);
+			setPosition(id, pSCA->Position_Real - step);
 		}
 	}
 	else
@@ -88,12 +98,11 @@ char update_status(void)
 				return 10 + i;
 			}
 		}
-		//check if enable
-		//todo
 		//update position
 		for (i = 1; i < 5; i++)
 		{
-			if (getPosition(i, Unblock) == SCA_NoError)
+			//if (getPosition(i, Unblock) == SCA_NoError)
+			if (requestCVPValue(i, Unblock) == SCA_NoError) //new function, untested
 			{
 				continue;
 			}
@@ -104,6 +113,44 @@ char update_status(void)
 		}
 	}
 	return 0;
+}
+
+char motor_act_position(size_t id, float speed, float position)
+{
+	SCA_Handler_t *pSCA = NULL;
+	pSCA = getInstance(id);
+	if (pSCA != NULL)
+	{
+		mp[id].id = id;
+		mp[id].speed = speed / 1000;
+		mp[id].step = fabsf(pSCA->Position_Real - position);
+		mp[id].target = position;
+		switch (id)
+		{
+		case 1:
+		{
+			TIM_Cmd(TIM3, ENABLE);
+			break;
+		}
+		case 2:
+		{
+			TIM_Cmd(TIM4, ENABLE);
+			break;
+		}
+		case 3:
+		{
+			TIM_Cmd(TIM13, ENABLE);
+			break;
+		}
+		case 4:
+		{
+			TIM_Cmd(TIM14, ENABLE);
+			break;
+		}
+		}
+		return 0;
+	}
+	return 100;
 }
 
 /**
@@ -124,6 +171,12 @@ int main(void)
 
 	TIM2_init(100 - 1, 9000 - 1);
 
+	TIM_init(10 - 1, 9000 - 1, 3);
+	TIM_init(10 - 1, 9000 - 1, 4);
+	TIM_init(10 - 1, 9000 - 1, 13);
+	TIM_init(10 - 1, 9000 - 1, 14);
+	TIM_init(10 - 1, 9000 - 1, 6);
+
 	/* 等待命令传入 */
 	while (1)
 	{
@@ -132,11 +185,25 @@ int main(void)
 			CMD_Handler(cmd);
 			cmd = 0;
 		}
-		else
-			delay_ms(10);
-
-		//delay_ms(1000);
 		if_error = update_status();
+		if (if_need_lookup_monitor)
+		{
+			if (lookup_counter > 10)
+			{
+				if_error = 100;
+			}
+			else
+			{
+				lookup_counter++;
+				SCA_Lookup();
+				SCA_Init();
+				delay_ms(1000);
+			}
+		}
+		else
+		{
+			lookup_counter = 0;
+		}
 	}
 }
 
@@ -197,7 +264,7 @@ static void CMD_Handler(uint8_t cmd)
 		printf("\r\n进入位置归零测试！\r\n");
 
 		/* 调用测试程序 位置归零 */
-		SCA_Homing();
+		//SCA_Homing();
 
 		printf("位置归零测试结束！\r\n");
 		break;
@@ -208,7 +275,7 @@ static void CMD_Handler(uint8_t cmd)
 		printf("\r\n进入正反转切换测试！\r\n");
 
 		/* 调用测试程序 正反转切换 */
-		SCA_Exp1();
+		//SCA_Exp1();
 
 		printf("正反转切换测试结束！\r\n");
 		break;
@@ -219,7 +286,7 @@ static void CMD_Handler(uint8_t cmd)
 		printf("\r\n进入高低速切换测试！\r\n");
 
 		/* 调用测试程序 高低速切换 */
-		SCA_Exp2();
+		//SCA_Exp2();
 
 		printf("高低速切换测试结束！\r\n");
 		break;
@@ -252,70 +319,69 @@ static void CMD_Handler(uint8_t cmd)
 	}
 	case 12:
 	{
-		printf("read 1 motor mode \n");
-		getActuatorMode(1, Block);
+		printf("write motor to position S mode \n");
+		activateActuatorMode(1, SCA_Profile_Position_Mode, Block);
+		activateActuatorMode(2, SCA_Profile_Position_Mode, Block);
+		activateActuatorMode(3, SCA_Profile_Position_Mode, Block);
+		activateActuatorMode(4, SCA_Profile_Position_Mode, Block);
 		break;
 	}
 	case 13:
 	{
-		printf("write 1 motor to position mode \n");
-		activateActuatorMode(1, 3, Block);
-		activateActuatorMode(2, 3, Block);
-		activateActuatorMode(3, 3, Block);
-		activateActuatorMode(4, 3, Block);
+		printf("write motor to position mode \n");
+		activateActuatorMode(1, SCA_Position_Mode, Block);
+		activateActuatorMode(2, SCA_Position_Mode, Block);
+		activateActuatorMode(3, SCA_Position_Mode, Block);
+		activateActuatorMode(4, SCA_Position_Mode, Block);
 		break;
 	}
 	case 14:
 	{
-		SCA_Handler_t *pSCA = NULL;
-		printf(" motor 1 rotate 0.1 R \n");
-		getPosition(1, Block);
-		delay_ms(10);
-
-		/* 获取该ID的信息句柄 */
-		pSCA = getInstance(1);
-		if (pSCA != NULL)
-		{
-			float target = pSCA->Position_Real + 0.1;
-			setPosition(1, target);
-		}
 		break;
 	}
+	//motor 4 +
 	case 15:
 	{
 		motor_act(4, 0.01, 0);
 		break;
 	}
+	//motor 4 -
 	case 16:
 	{
 		motor_act(4, 0.01, 1);
 		break;
 	}
+	//motor 3 +
 	case 17:
 	{
 		motor_act(3, 0.01, 0);
 		break;
 	}
+	//motor 3 -
 	case 18:
 	{
 		motor_act(3, 0.01, 1);
 		break;
 	}
+	//motor 2 +
 	case 19:
 	{
 		motor_act(2, 0.01, 0);
 		break;
 	}
+	//motor 2 -
 	case 20:
 	{
 		motor_act(2, 0.01, 1);
 		break;
 	}
+	//motor 1 +
 	case 21:
 	{
 		motor_act(1, 0.01, 0);
 		break;
 	}
+	//motor 1 -
 	case 22:
 	{
 		motor_act(1, 0.01, 1);

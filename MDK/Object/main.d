@@ -47,4 +47,5 @@
 .\object\main.o: ..\SCA\SCA_Protocol.h
 .\object\main.o: ..\SCA\SCA_APP.h
 .\object\main.o: ..\USER\main.h
+.\object\main.o: D:\Keil_v5\ARM\ARMCC\Bin\..\include\math.h
 .\object\main.o: ..\SYSTEM\timer.h

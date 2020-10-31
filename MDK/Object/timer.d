@@ -48,3 +48,4 @@
 .\object\timer.o: ..\SCA\SCA_API.h
 .\object\timer.o: ..\SCA\SCA_Protocol.h
 .\object\timer.o: ..\SCA\SCA_APP.h
+.\object\timer.o: D:\Keil_v5\ARM\ARMCC\Bin\..\include\math.h

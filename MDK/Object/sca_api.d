@@ -48,4 +48,5 @@
 .\object\sca_api.o: D:\Keil_v5\ARM\ARMCC\Bin\..\include\string.h
 .\object\sca_api.o: ..\USER\main.h
 .\object\sca_api.o: ..\SCA\SCA_APP.h
+.\object\sca_api.o: D:\Keil_v5\ARM\ARMCC\Bin\..\include\math.h
 .\object\sca_api.o: ..\SYSTEM\timer.h
