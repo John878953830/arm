@@ -38,6 +38,8 @@ static void CMD_Handler(uint8_t cmd);
 char motor_act(size_t id, float step, char dir)
 {
 	SCA_Handler_t *pSCA = NULL;
+	mp[id].id=id;
+	mp[id].step=step;
 	//check system status
 	if (if_error != 0)
 	{
@@ -122,8 +124,8 @@ char motor_act_position(size_t id, float speed, float position)
 	if (pSCA != NULL)
 	{
 		mp[id].id = id;
-		mp[id].speed = speed / 1000;
-		mp[id].step = fabsf(pSCA->Position_Real - position);
+		mp[id].speed = speed;
+		mp[id].step = mp[id].speed/100;//0.1; //fabsf(pSCA->Position_Real - position)/1000;
 		mp[id].target = position;
 		switch (id)
 		{
@@ -175,7 +177,9 @@ int main(void)
 	TIM_init(10 - 1, 9000 - 1, 4);
 	TIM_init(10 - 1, 9000 - 1, 13);
 	TIM_init(10 - 1, 9000 - 1, 14);
-	TIM_init(10 - 1, 9000 - 1, 6);
+	TIM_init(5 - 1, 9000 - 1, 6);
+	
+	TIM_Cmd(TIM6,ENABLE);
 
 	/* µÈ´ýÃüÁî´«Èë */
 	while (1)
@@ -342,52 +346,63 @@ static void CMD_Handler(uint8_t cmd)
 	//motor 4 +
 	case 15:
 	{
-		motor_act(4, 0.01, 0);
+		motor_act(4, 0.1, 0);
 		break;
 	}
 	//motor 4 -
 	case 16:
 	{
-		motor_act(4, 0.01, 1);
+		motor_act(4, 0.1, 1);
 		break;
 	}
 	//motor 3 +
 	case 17:
 	{
-		motor_act(3, 0.01, 0);
+		motor_act(3, 0.1, 0);
 		break;
 	}
 	//motor 3 -
 	case 18:
 	{
-		motor_act(3, 0.01, 1);
+		motor_act(3, 0.1, 1);
 		break;
 	}
 	//motor 2 +
 	case 19:
 	{
-		motor_act(2, 0.01, 0);
+		motor_act(2, 0.1, 0);
 		break;
 	}
 	//motor 2 -
 	case 20:
 	{
-		motor_act(2, 0.01, 1);
+		motor_act(2, 0.1, 1);
 		break;
 	}
 	//motor 1 +
 	case 21:
 	{
-		motor_act(1, 0.01, 0);
+		motor_act(1, 0.1, 0);
 		break;
 	}
 	//motor 1 -
 	case 22:
 	{
-		motor_act(1, 0.01, 1);
+		motor_act(1, 0.1, 1);
 		break;
 	}
 
+	//motor 4 +, speed function
+	case 23:
+	{
+		motor_act_position(4, 100, 36);
+		break;
+	}
+	case 24:
+	{
+		motor_act_position(4, 100, 0);
+		break;
+	}
 	default:
 		Log();
 		break;

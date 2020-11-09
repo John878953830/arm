@@ -299,7 +299,7 @@ void TIM6_DAC_IRQHandler(void)
 {
     if (TIM_GetITStatus(TIM6, TIM_IT_Update) == SET)
     {
-        tim6_counter++;
+        if_error = update_status();
     }
     TIM_ClearITPendingBit(TIM6, TIM_IT_Update);
 }
@@ -334,14 +334,15 @@ void TIM8_TRG_COM_TIM14_IRQHandler(void)
         pSCA = getInstance(4);
         if (pSCA != NULL)
         {
-            if (fabs(mp[4].target - pSCA->Position_Real) > 0.01)
+            if (fabsf(mp[4].target - pSCA->Position_Real) > (mp[4].step/2))//
             {
-                motor_act(4, mp[4].step, mp[4].speed > 0 ? 0 : 1);
+                motor_act(4, mp[4].step, mp[4].target - pSCA->Position_Real > 0 ? 0 : 1);
                 tim14_counter++;
             }
             else
             {
                 TIM_Cmd(TIM14, DISABLE);
+							  setPosition(4, mp[4].target);
             }
         }
     }
