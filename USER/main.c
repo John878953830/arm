@@ -12,7 +12,9 @@
 #include "SCA_API.h"
 #include "SCA_APP.h"
 #include "main.h"
+#include <math.h>
 #include "timer.h"
+
 
 /* Variable defines --------------------------------------------------------------*/
 uint8_t cmd = 0;						  //外部控制命令
@@ -30,16 +32,48 @@ unsigned int tim6_counter = 0;
 unsigned int tim13_counter = 0;
 unsigned int tim14_counter = 0;
 
-MOTOR_PARAMETER mp[5];
+//rotation matrix
+float r1_0[3][3];
+float r2_0[3][3];
+float r3_0[3][3];
+float r4_0[3][3];
 
+//offset matrix
+float porg_1_0[3][1];
+float porg_2_1[3][1];
+float porg_3_2[3][1];
+float porg_4_3[3][1];
+MOTOR_PARAMETER mp[5];
+float mmk=0;
 /* Forward Declaration -----------------------------------------------------------*/
 static void Log(void);
 static void CMD_Handler(uint8_t cmd);
+
+void motor_parameter_init(void)
+{
+	//init porg
+	porg_1_0[0][0] = 0;
+	porg_1_0[1][0] = 0;
+	porg_1_0[2][0] = 0;
+
+	porg_2_1[0][0] = 0;
+	porg_2_1[1][0] = L1;
+	porg_2_1[2][0] = 0;
+
+	porg_3_2[0][0] = L2;
+	porg_3_2[1][0] = 0;
+	porg_3_2[2][0] = 0;
+
+	porg_4_3[0][0] = L3;
+	porg_4_3[1][0] = 0;
+	porg_4_3[2][0] = D3;
+	return;
+}
 char motor_act(size_t id, float step, char dir)
 {
 	SCA_Handler_t *pSCA = NULL;
-	mp[id].id=id;
-	mp[id].step=step;
+	mp[id].id = id;
+	mp[id].step = step;
 	//check system status
 	if (if_error != 0)
 	{
@@ -125,7 +159,7 @@ char motor_act_position(size_t id, float speed, float position)
 	{
 		mp[id].id = id;
 		mp[id].speed = speed;
-		mp[id].step = mp[id].speed/100;//0.1; //fabsf(pSCA->Position_Real - position)/1000;
+		mp[id].step = mp[id].speed / 100; //0.1; //fabsf(pSCA->Position_Real - position)/1000;
 		mp[id].target = position;
 		switch (id)
 		{
@@ -170,6 +204,7 @@ int main(void)
 
 	/* 串口1打印LOG信息 */
 	Log();
+	mmk = sinf(0.5);
 
 	TIM2_init(100 - 1, 9000 - 1);
 
@@ -177,9 +212,9 @@ int main(void)
 	TIM_init(10 - 1, 9000 - 1, 4);
 	TIM_init(10 - 1, 9000 - 1, 13);
 	TIM_init(10 - 1, 9000 - 1, 14);
-	TIM_init(5 - 1, 9000 - 1, 6);
-	
-	TIM_Cmd(TIM6,ENABLE);
+	TIM_init(10 - 1, 9000 - 1, 6);
+
+	TIM_Cmd(TIM6, ENABLE);
 
 	/* 等待命令传入 */
 	while (1)

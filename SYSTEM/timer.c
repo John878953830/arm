@@ -299,7 +299,7 @@ void TIM6_DAC_IRQHandler(void)
 {
     if (TIM_GetITStatus(TIM6, TIM_IT_Update) == SET)
     {
-        if_error = update_status();
+        //if_error = update_status();
     }
     TIM_ClearITPendingBit(TIM6, TIM_IT_Update);
 }
