@@ -7,25 +7,27 @@
 //#include "arm_math.h"
 
 #define DEBUG_OUTPUT 1
+#define Pi 3.141593f
+#define A2R(angle) (angle * Pi / 180)
 
 //matrix define
-#define L0 0
-#define A0 0
-#define D0 0
-#define T0 0
-#define L1 119.1
-#define A1 -90
-#define D1 0
-#define T1 0
-#define L2 235
-#define A2 0
-#define D2 0
-#define T2 0
-#define L3 265
-#define A3 0
-#define D3 9.5
-#define T3 0
-#define Pi 3.141593
+#define L0 0f
+#define A0 0f
+#define D0 0f
+#define T0 0f
+#define L1 119.4f
+#define A1 -90.0f
+#define D1 0f
+#define T1 0f
+#define L2 235.0f
+#define A2 0f
+#define D2 0f
+#define T2 0f
+#define L3 265.9f
+#define A3 0f
+#define D3 -9.5f
+#define T3 0f
+
 extern unsigned char total_motor_number;
 extern unsigned char if_error;
 extern unsigned char if_need_lookup_monitor;
@@ -51,6 +53,7 @@ extern float porg_4_3[3][1];
 
 typedef struct motor_parameter
 {
+    float angle_dir;
     float zero_offset;
     float step;
     float speed;
@@ -60,6 +63,13 @@ typedef struct motor_parameter
 
 extern MOTOR_PARAMETER mp[5];
 
+/**
+ * @brief calculate the rotation matrix
+ * @param t1   angle1
+ * @param t2   angle2
+ * @param t3   angle3
+ * @param t4   angle4
+ */
 void calculate_r_4_0(float t1, float t2, float t3, float t4);
 
 void calculate_r_3_0(float t1, float t2, float t3);
@@ -96,4 +106,34 @@ char update_status(void);
  * @return char 0: no error, 1~255: error
  */
 char motor_act_position(size_t id, float speed, float position);
+
+/**
+ * @brief   angle act command
+ * 
+ * @param t1 
+ * @param t2 
+ * @param t3 
+ * @param t4 
+ * @param v1 
+ * @param v2 
+ * @param v3 
+ * @param v4 
+ * @return char 
+ */
+char angle_act_position(float t1, float t2, float t3, float t4, float v1, float v2, float v3, float v4);
+/**
+ * @brief  give the position of x, y, z for the original point p4org
+ * 
+ * @param t1 
+ * @param t2 
+ * @param t3 
+ * @param t4 
+ * @param x 
+ * @param y 
+ * @param z 
+ * @return char 
+ */
+char calculate_position_xyz(float t1, float t2, float t3, float t4, float *x, float *y, float *z);
+
+char position_2_angle(float *t1, float *t2, float *t3, float *t4);
 #endif

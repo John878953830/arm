@@ -259,14 +259,15 @@ void TIM3_IRQHandler(void)
         pSCA = getInstance(1);
         if (pSCA != NULL)
         {
-            if (fabs(mp[1].target - pSCA->Position_Real) > 0.01)
+            if (__fabs(mp[1].target - pSCA->Position_Real) > (mp[1].step/2))//
             {
-                motor_act(1, mp[1].step, mp[1].speed > 0 ? 0 : 1);
+                motor_act(1, mp[1].step, mp[1].target - pSCA->Position_Real > 0 ? 0 : 1);
                 tim3_counter++;
             }
             else
             {
                 TIM_Cmd(TIM3, DISABLE);
+							  setPosition(1, mp[1].target);
             }
         }
     }
@@ -281,14 +282,15 @@ void TIM4_IRQHandler(void)
         pSCA = getInstance(2);
         if (pSCA != NULL)
         {
-            if (fabs(mp[2].target - pSCA->Position_Real) > 0.01)
+            if (__fabs(mp[2].target - pSCA->Position_Real) > (mp[2].step/2))//
             {
-                motor_act(2, mp[2].step, mp[2].speed > 0 ? 0 : 1);
+                motor_act(2, mp[2].step, mp[2].target - pSCA->Position_Real > 0 ? 0 : 1);
                 tim4_counter++;
             }
             else
             {
                 TIM_Cmd(TIM4, DISABLE);
+							  setPosition(2, mp[2].target);
             }
         }
     }
@@ -312,14 +314,15 @@ void TIM8_UP_TIM13_IRQHandler(void)
         pSCA = getInstance(3);
         if (pSCA != NULL)
         {
-            if (fabs(mp[3].target - pSCA->Position_Real) > 0.01)
+            if (__fabs(mp[3].target - pSCA->Position_Real) > (mp[3].step/2))//
             {
-                motor_act(3, mp[3].step, mp[3].speed > 0 ? 0 : 1);
+                motor_act(3, mp[3].step, mp[3].target - pSCA->Position_Real > 0 ? 0 : 1);
                 tim13_counter++;
             }
             else
             {
                 TIM_Cmd(TIM13, DISABLE);
+							  setPosition(3, mp[3].target);
             }
         }
     }
@@ -334,7 +337,7 @@ void TIM8_TRG_COM_TIM14_IRQHandler(void)
         pSCA = getInstance(4);
         if (pSCA != NULL)
         {
-            if (fabsf(mp[4].target - pSCA->Position_Real) > (mp[4].step/2))//
+            if (__fabs(mp[4].target - pSCA->Position_Real) > (mp[4].step/2))//
             {
                 motor_act(4, mp[4].step, mp[4].target - pSCA->Position_Real > 0 ? 0 : 1);
                 tim14_counter++;

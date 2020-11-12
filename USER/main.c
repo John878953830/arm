@@ -15,7 +15,6 @@
 #include <math.h>
 #include "timer.h"
 
-
 /* Variable defines --------------------------------------------------------------*/
 uint8_t cmd = 0;						  //外部控制命令
 unsigned char total_motor_number = 0;	  //save the total motor number
@@ -44,10 +43,74 @@ float porg_2_1[3][1];
 float porg_3_2[3][1];
 float porg_4_3[3][1];
 MOTOR_PARAMETER mp[5];
-float mmk=0;
+float mmk = 0;
 /* Forward Declaration -----------------------------------------------------------*/
 static void Log(void);
 static void CMD_Handler(uint8_t cmd);
+
+void calculate_r_1_0(float t1)
+{
+	r1_0[0][0] = cosf(A2R(t1));
+	r1_0[0][1] = -sinf(A2R(t1));
+	r1_0[0][2] = 0;
+
+	r1_0[1][0] = sinf(A2R(t1));
+	r1_0[1][1] = r1_0[0][0];
+	r1_0[1][2] = 0;
+
+	r1_0[2][0] = 0;
+	r1_0[2][1] = 0;
+	r1_0[2][2] = 1;
+	return;
+}
+
+void calculate_r_2_0(float t1, float t2)
+{
+	r2_0[0][0] = cosf(A2R(t1)) * cosf(A2R(t2));
+	r2_0[0][1] = -cosf(A2R(t1)) * sinf(A2R(t2));
+	r2_0[0][2] = -sinf(A2R(t1));
+
+	r2_0[1][0] = sinf(A2R(t1)) * cosf(A2R(t2));
+	r2_0[1][1] = -sinf(A2R(t1)) * sinf(A2R(t2));
+	r2_0[1][2] = cosf(A2R(t1));
+
+	r2_0[2][0] = -sinf(A2R(t2));
+	r2_0[2][1] = -cosf(A2R(t2));
+	r2_0[2][2] = 0;
+	return;
+}
+
+void calculate_r_3_0(float t1, float t2, float t3)
+{
+	r3_0[0][0] = cosf(A2R(t1)) * cosf(A2R(t2 + t3));
+	r3_0[0][1] = -cosf(A2R(t1)) * sinf(A2R(t2 + t3));
+	r3_0[0][2] = -sinf(A2R(t1));
+
+	r3_0[1][0] = sinf(A2R(t1)) * cosf(A2R(t2 + t3));
+	r3_0[1][1] = -sinf(A2R(t1)) * sinf(A2R(t2 + t3));
+	r3_0[1][2] = cosf(A2R(t1));
+
+	r3_0[2][0] = -sinf(A2R(t2 + t3));
+	r3_0[2][1] = -cosf(A2R(t2 + t3));
+	r3_0[2][2] = 0;
+	return;
+}
+
+void calculate_r_4_0(float t1, float t2, float t3, float t4)
+{
+	r4_0[0][0] = cosf(A2R(t1)) * cosf(A2R(t2 + t3 + t4));
+	r4_0[0][1] = -cosf(A2R(t1)) * sinf(A2R(t2 + t3 + t4));
+	r4_0[0][2] = -sinf(A2R(t1));
+
+	r4_0[1][0] = sinf(A2R(t1)) * cosf(A2R(t2 + t3 + t4));
+	r4_0[1][1] = -sinf(A2R(t1)) * sinf(A2R(t2 + t3 + t4));
+	r4_0[1][2] = cosf(A2R(t1));
+
+	r4_0[2][0] = -sinf(A2R(t2 + t3 + t4));
+	r4_0[2][1] = -cosf(A2R(t2 + t3 + t4));
+	r4_0[2][2] = 0;
+	return;
+}
 
 void motor_parameter_init(void)
 {
@@ -67,8 +130,29 @@ void motor_parameter_init(void)
 	porg_4_3[0][0] = L3;
 	porg_4_3[1][0] = 0;
 	porg_4_3[2][0] = D3;
+
+	//init offset
+	mp[1].zero_offset = 0.2937;
+	mp[2].zero_offset = 16.0557;
+	mp[3].zero_offset = 33.4606;
+	mp[4].zero_offset = 0.8805;
+
+	//init angle dir
+	mp[1].angle_dir = -1;
+	mp[2].angle_dir = -1;
+	mp[3].angle_dir = 1;
+	mp[4].angle_dir = -1;
 	return;
 }
+
+char calculate_position_xyz(float t1, float t2, float t3, float t4, float *x, float *y, float *z)
+{
+	*x = L3 * cosf(A2R(t1)) * cosf(A2R(t2 + t3)) - D3 * sinf(A2R(t1)) + L2 * cosf(A2R(t1)) * cosf(A2R(t2)) - L1 * sinf(A2R(t1));
+	*y = L3 * sinf(A2R(t1)) * cosf(A2R(t2 + t3)) + D3 * cosf(A2R(t1)) + L2 * sinf(A2R(t1)) * cosf(A2R(t2)) + L1 * cosf(A2R(t1));
+	*z = -L3 * sinf(A2R(t2 + t3)) - L2 * sinf(A2R(t2));
+	return 0;
+}
+
 char motor_act(size_t id, float step, char dir)
 {
 	SCA_Handler_t *pSCA = NULL;
@@ -159,7 +243,7 @@ char motor_act_position(size_t id, float speed, float position)
 	{
 		mp[id].id = id;
 		mp[id].speed = speed;
-		mp[id].step = mp[id].speed / 100; //0.1; //fabsf(pSCA->Position_Real - position)/1000;
+		mp[id].step = mp[id].speed / 1000; //0.1; //fabsf(pSCA->Position_Real - position)/1000;
 		mp[id].target = position;
 		switch (id)
 		{
@@ -189,6 +273,68 @@ char motor_act_position(size_t id, float speed, float position)
 	return 100;
 }
 
+char angle_act_position(float t1, float t2, float t3, float t4, float v1, float v2, float v3, float v4)
+{
+	float tmp_t1 = t1 / 10 * mp[1].angle_dir + mp[1].zero_offset;
+	float tmp_t2 = t2 / 10 * mp[2].angle_dir + mp[2].zero_offset;
+	float tmp_t3 = t3 / 10 * mp[3].angle_dir + mp[3].zero_offset;
+	float tmp_t4 = t4 / 10 * mp[4].angle_dir + mp[4].zero_offset;
+
+	motor_act_position(1, v1, tmp_t1);
+	motor_act_position(2, v2, tmp_t2);
+	motor_act_position(3, v3, tmp_t3);
+	motor_act_position(4, v4, tmp_t4);
+	return 0;
+}
+
+char position_2_angle(float *t1, float *t2, float *t3, float *t4)
+{
+	char k = 0;
+	SCA_Handler_t *pSCA = NULL;
+	for (k = 1; k < 5; k++)
+	{
+
+		pSCA = getInstance(k);
+		if (pSCA != NULL)
+		{
+
+			switch (k)
+			{
+			case 1:
+			{
+				*t1 = (pSCA->Position_Real - mp[1].zero_offset) * 10 / mp[1].angle_dir;
+				break;
+			}
+			case 2:
+			{
+				*t2 = (pSCA->Position_Real - mp[2].zero_offset) * 10 / mp[2].angle_dir;
+				break;
+			}
+			case 3:
+			{
+				*t3 = (pSCA->Position_Real - mp[3].zero_offset) * 10 / mp[3].angle_dir;
+				break;
+			}
+			case 4:
+			{
+				*t4 = (pSCA->Position_Real - mp[4].zero_offset) * 10 / mp[4].angle_dir;
+				break;
+			}
+			default:
+				break;
+			}
+		}
+		else
+		{
+			break;
+		}
+	}
+	if (k != 5)
+	{
+		return 1;
+	}
+	return 0;
+}
 /**
   * @功	能	主程序入口
   * @参	数	无
@@ -204,17 +350,19 @@ int main(void)
 
 	/* 串口1打印LOG信息 */
 	Log();
-	mmk = sinf(0.5);
+	mmk = sinf(A2R(30));
 
 	TIM2_init(100 - 1, 9000 - 1);
 
-	TIM_init(10 - 1, 9000 - 1, 3);
-	TIM_init(10 - 1, 9000 - 1, 4);
-	TIM_init(10 - 1, 9000 - 1, 13);
-	TIM_init(10 - 1, 9000 - 1, 14);
+	TIM_init(50 - 1, 9000 - 1, 3);
+	TIM_init(50 - 1, 9000 - 1, 4);
+	TIM_init(50 - 1, 9000 - 1, 13);
+	TIM_init(50 - 1, 9000 - 1, 14);
 	TIM_init(10 - 1, 9000 - 1, 6);
 
-	TIM_Cmd(TIM6, ENABLE);
+	//TIM_Cmd(TIM6, ENABLE);
+
+	motor_parameter_init();
 
 	/* 等待命令传入 */
 	while (1)
@@ -436,6 +584,91 @@ static void CMD_Handler(uint8_t cmd)
 	case 24:
 	{
 		motor_act_position(4, 100, 0);
+		break;
+	}
+
+	case 25:
+	{
+		angle_act_position(10, 0, 0, 0, 10, 0, 0, 0);
+		break;
+	}
+	case 26:
+	{
+		angle_act_position(0, 0, 0, 0, 10, 0, 0, 0);
+		break;
+	}
+	case 27:
+	{
+		angle_act_position(-10, 0, 0, 0, 10, 0, 0, 0);
+		break;
+	}
+
+	case 28:
+	{
+		angle_act_position(0, 10, 0, 0, 0, 10, 0, 0);
+		break;
+	}
+	case 29:
+	{
+		angle_act_position(0, 0, 0, 0, 0, 10, 0, 0);
+		break;
+	}
+	case 30:
+	{
+		angle_act_position(0, -10, 0, 0, 0, 10, 0, 0);
+		break;
+	}
+
+	case 31:
+	{
+		angle_act_position(0, 0, 10, 0, 0, 0, 10, 0);
+		break;
+	}
+	case 32:
+	{
+		angle_act_position(0, 0, 0, 0, 0, 0, 10, 0);
+		break;
+	}
+	case 33:
+	{
+		angle_act_position(0, 0, -10, 0, 0, 0, 10, 0);
+		break;
+	}
+
+	case 34:
+	{
+		angle_act_position(0, 0, 0, 10, 0, 0, 0, 10);
+		break;
+	}
+	case 35:
+	{
+		angle_act_position(0, 0, 0, 0, 0, 0, 0, 10);
+		break;
+	}
+	case 36:
+	{
+		angle_act_position(0, 0, 0, -10, 0, 0, 0, 10);
+		break;
+	}
+
+	case 37:
+	{
+		float t1, t2, t3, t4;
+		char res = position_2_angle(&t1, &t2, &t3, &t4);
+		if (res != 0)
+		{
+			printf(" error while in processing position to angle\n");
+		}
+		else
+		{
+			t1=__fabs(t1)<0.01?0:t1;
+			t2=__fabs(t2)<0.01?0:t2;
+			t3=__fabs(t3)<0.01?0:t3;
+			t4=__fabs(t4)<0.01?0:t4;
+			float x = 0, y = 0, z = 0;
+			calculate_position_xyz(t1, t2, t3, t4, &x, &y, &z);
+			printf("%f, %f, %f\n", x, y, z);
+		}
 		break;
 	}
 	default:
