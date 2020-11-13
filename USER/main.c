@@ -335,6 +335,28 @@ char position_2_angle(float *t1, float *t2, float *t3, float *t4)
 	}
 	return 0;
 }
+
+char calculate_inverse(float x4, float y4, float z4, float *t1, float *t2, float *t3, float *t4)
+{
+	float ct1 = 0, ct2 = 0, ct3 = 0, ct4 = 0;
+	char res = position_2_angle(&ct1, &ct2, &ct3, &ct4);
+	if (res != 0)
+	{
+		printf("position to angle calculate error\n");
+		return 1;
+	}
+	else
+	{
+		float _t1 = atan2f(y4, x4); //R2A(atan2f(y4, x4));
+		float L3_P = L3 * cosf(_t1);
+		float L2_P = L2 * cosf(_t1);
+		float L1_D3_Q = (L1 + D3) * sinf(_t1);
+
+		printf("%f\n", tan_t1);
+	}
+
+	return 0;
+}
 /**
   * @功	能	主程序入口
   * @参	数	无
@@ -661,14 +683,24 @@ static void CMD_Handler(uint8_t cmd)
 		}
 		else
 		{
-			t1=__fabs(t1)<0.01?0:t1;
-			t2=__fabs(t2)<0.01?0:t2;
-			t3=__fabs(t3)<0.01?0:t3;
-			t4=__fabs(t4)<0.01?0:t4;
+			t1 = __fabs(t1) < 0.01 ? 0 : t1;
+			t2 = __fabs(t2) < 0.01 ? 0 : t2;
+			t3 = __fabs(t3) < 0.01 ? 0 : t3;
+			t4 = __fabs(t4) < 0.01 ? 0 : t4;
 			float x = 0, y = 0, z = 0;
 			calculate_position_xyz(t1, t2, t3, t4, &x, &y, &z);
 			printf("%f, %f, %f\n", x, y, z);
 		}
+		break;
+	}
+	case 38:
+	{
+		float t1, t2, t3, t4;
+		calculate_inverse(1, 1, 0, &t1, &t2, &t3, &t4);
+		calculate_inverse(1, -1, 0, &t1, &t2, &t3, &t4);
+		calculate_inverse(-1, 1, 0, &t1, &t2, &t3, &t4);
+		calculate_inverse(-1, -1, 0, &t1, &t2, &t3, &t4);
+
 		break;
 	}
 	default:

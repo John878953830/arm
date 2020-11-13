@@ -9,6 +9,7 @@
 #define DEBUG_OUTPUT 1
 #define Pi 3.141593f
 #define A2R(angle) (angle * Pi / 180)
+#define R2A(radian) (radian * 180 / Pi)
 
 //matrix define
 #define L0 0f
@@ -134,6 +135,16 @@ char angle_act_position(float t1, float t2, float t3, float t4, float v1, float 
  * @return char 
  */
 char calculate_position_xyz(float t1, float t2, float t3, float t4, float *x, float *y, float *z);
-
+/**
+ * @brief      save angle in t1, t2, t3, t4
+ * 
+ * @param t1 
+ * @param t2 
+ * @param t3 
+ * @param t4 
+ * @return char 
+ */
 char position_2_angle(float *t1, float *t2, float *t3, float *t4);
+
+char calculate_inverse(float x4, float y4, float z4, float *t1, float *t2, float *t3, float *t4);
 #endif
