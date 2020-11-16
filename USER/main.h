@@ -40,6 +40,8 @@ extern unsigned int tim6_counter;
 extern unsigned int tim13_counter;
 extern unsigned int tim14_counter;
 
+extern float pre_angle[5];
+
 //rotation matrix
 extern float r1_0[3][3];
 extern float r2_0[3][3];

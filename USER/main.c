@@ -44,6 +44,8 @@ float porg_3_2[3][1];
 float porg_4_3[3][1];
 MOTOR_PARAMETER mp[5];
 float mmk = 0;
+
+float pre_angle[5];
 /* Forward Declaration -----------------------------------------------------------*/
 static void Log(void);
 static void CMD_Handler(uint8_t cmd);
@@ -147,9 +149,15 @@ void motor_parameter_init(void)
 
 char calculate_position_xyz(float t1, float t2, float t3, float t4, float *x, float *y, float *z)
 {
-	*x = L3 * cosf(A2R(t1)) * cosf(A2R(t2 + t3)) - D3 * sinf(A2R(t1)) + L2 * cosf(A2R(t1)) * cosf(A2R(t2)) - L1 * sinf(A2R(t1));
-	*y = L3 * sinf(A2R(t1)) * cosf(A2R(t2 + t3)) + D3 * cosf(A2R(t1)) + L2 * sinf(A2R(t1)) * cosf(A2R(t2)) + L1 * cosf(A2R(t1));
-	*z = -L3 * sinf(A2R(t2 + t3)) - L2 * sinf(A2R(t2));
+	float c1 = cosf(A2R(t1));
+	float tc23 = t2 + t3;
+	float c23 = cosf(A2R(tc23));
+	float s1 = sinf(A2R(t1));
+	float c2 = cosf(A2R(t2));
+	float s23 = t2 + t3;
+	*x = L3 * cosf(A2R(t1)) * c23 - D3 * sinf(A2R(t1)) + L2 * cosf(A2R(t1)) * cosf(A2R(t2)) - L1 * sinf(A2R(t1));
+	*y = L3 * sinf(A2R(t1)) * c23 + D3 * cosf(A2R(t1)) + L2 * sinf(A2R(t1)) * cosf(A2R(t2)) + L1 * cosf(A2R(t1));
+	*z = -L3 * sin(A2R(s23)) - L2 * sin(t2 * Pi / 180.0);
 	return 0;
 }
 
@@ -347,12 +355,81 @@ char calculate_inverse(float x4, float y4, float z4, float *t1, float *t2, float
 	}
 	else
 	{
-		float _t1 = atan2f(y4, x4); //R2A(atan2f(y4, x4));
-		float L3_P = L3 * cosf(_t1);
-		float L2_P = L2 * cosf(_t1);
-		float L1_D3_Q = (L1 + D3) * sinf(_t1);
+		float tmp_b = L1 + D3;
+		int a_dir = 0;
+		float tmp_a = sqrtf(x4 * x4 + y4 * y4 - tmp_b * tmp_b);
+		printf("a    %f\n", tmp_a);
 
-		printf("%f\n", tan_t1);
+		float t1_array[5];
+		//calculate the theta 1 when tmp_a > 0
+		float t1_tmp = asinf((tmp_a * y4 - tmp_b * x4) / (x4 * x4 + y4 * y4));
+		t1_array[1] = R2A(t1_tmp) > 180 ? t1_tmp - 360 : R2A(t1_tmp);
+		t1_array[2] = (180 - R2A(t1_tmp)) > 180 ? 180 - R2A(t1_tmp) - 360 : 180 - R2A(t1_tmp);
+		printf("tmp t1 1 2 is       %f      %f\n", t1_array[1], t1_array[2]);
+
+		//calculate the theta1 when a < 0
+		tmp_a = -tmp_a;
+		t1_tmp = asinf((tmp_a * y4 - tmp_b * x4) / (x4 * x4 + y4 * y4));
+		t1_array[3] = R2A(t1_tmp) > 180 ? t1_tmp - 360 : R2A(t1_tmp);
+		t1_array[4] = (180 - R2A(t1_tmp)) > 180 ? 180 - R2A(t1_tmp) - 360 : 180 - R2A(t1_tmp);
+		printf("tmp t1 3 4 is       %f      %f\n", t1_array[3], t1_array[4]);
+		//find the nearest one to t1a
+		char i = 1, index = 1;
+		float tmpt1_f = 370;
+		for (i = 1; i < 5; i++)
+		{
+			if (__fabs(ct1 - t1_array[i]) < tmpt1_f)
+			{
+				index = i;
+				tmpt1_f = __fabs(ct1 - t1_array[i]);
+			}
+		}
+		float _t1 = t1_array[index];
+		if (index == 1 || index == 2)
+		{
+			a_dir = 1;
+		}
+		else
+		{
+			a_dir = -1;
+			tmp_a = -sqrtf(x4 * x4 + y4 * y4 - tmp_b * tmp_b);
+		}
+		printf("theta 1       %f\n,    a dir      %d\n", _t1, a_dir);
+
+		float t3_array[3];
+		float _t3 = acosf((x4 * x4 + y4 * y4 + z4 * z4 - tmp_b * tmp_b - L2 * L2 - L3 * L3) / 2 / L2 / L3);
+		t3_array[1] = R2A(_t3);
+		t3_array[2] = 180 + R2A(_t3) > 180 ? -R2A(_t3) : 180 + R2A(_t3);
+		printf("theta 3 1  2  %f, %f\n", t3_array[1], t3_array[2]);
+
+		//find the nearest
+		_t3 = __fabs(ct3 - t3_array[1]) < __fabs(ct3 - t3_array[2]) ? t3_array[1] : t3_array[2];
+		printf(" theta 3 is   %f\n", _t3);
+
+		float mod = sqrtf(L3 * L3 + L2 * L2 + 2 * L2 * L3 * cosf(A2R(_t3)));
+
+		float t2_array[5];
+		float tmpt2 = acosf(tmp_a / mod);
+		float tmpt2_0 = acosf((L3 * cosf(A2R(_t3)) + L2) / mod);
+
+		t2_array[1] = tmpt2 - tmpt2_0;
+		t2_array[2] = tmpt2 + tmpt2_0;
+		t2_array[3] = -tmpt2 - tmpt2_0;
+		t2_array[4] = -tmpt2 + tmpt2_0;
+
+		printf("t2 %f,   %f   %f   %f\n", R2A(t2_array[1]), R2A(t2_array[2]), R2A(t2_array[3]), R2A(t2_array[4]));
+		//find the nearest
+		float tmp_t2f = 370;
+		for (i = 1; i < 5; i++)
+		{
+			if (__fabs(ct2 - R2A(t2_array[i])) < tmp_t2f)
+			{
+				index = i;
+				tmp_t2f = __fabs(ct2 - R2A(t2_array[i]));
+			}
+		}
+
+		printf(" t2 is   %f\n", R2A(t2_array[index]));
 	}
 
 	return 0;
@@ -688,6 +765,7 @@ static void CMD_Handler(uint8_t cmd)
 			t3 = __fabs(t3) < 0.01 ? 0 : t3;
 			t4 = __fabs(t4) < 0.01 ? 0 : t4;
 			float x = 0, y = 0, z = 0;
+			printf("%f,%f,%f,%f\n", t1, t2, t3, t4);
 			calculate_position_xyz(t1, t2, t3, t4, &x, &y, &z);
 			printf("%f, %f, %f\n", x, y, z);
 		}
@@ -696,10 +774,23 @@ static void CMD_Handler(uint8_t cmd)
 	case 38:
 	{
 		float t1, t2, t3, t4;
-		calculate_inverse(1, 1, 0, &t1, &t2, &t3, &t4);
-		calculate_inverse(1, -1, 0, &t1, &t2, &t3, &t4);
-		calculate_inverse(-1, 1, 0, &t1, &t2, &t3, &t4);
-		calculate_inverse(-1, -1, 0, &t1, &t2, &t3, &t4);
+		char res = position_2_angle(&t1, &t2, &t3, &t4);
+		if (res != 0)
+		{
+			printf(" error while in processing position to angle\n");
+		}
+		else
+		{
+			t1 = __fabs(t1) < 0.01 ? 0 : t1;
+			t2 = __fabs(t2) < 0.01 ? 0 : t2;
+			t3 = __fabs(t3) < 0.01 ? 0 : t3;
+			t4 = __fabs(t4) < 0.01 ? 0 : t4;
+			float x = 0, y = 0, z = 0;
+			calculate_position_xyz(t1, t2, t3, t4, &x, &y, &z);
+			printf("position   :  %f,   %f,    %f\n", x, y, z);
+			calculate_inverse(x, y, z, &t1, &t2, &t3, &t4);
+			printf("angle      :  %f,   %f,    %f\n", t1, t2, t3);
+		}
 
 		break;
 	}
