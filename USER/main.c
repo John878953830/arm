@@ -255,7 +255,7 @@ char motor_act_position(size_t id, float speed, float position)
 	{
 		mp[id].id = id;
 		mp[id].speed = speed;
-		mp[id].step = mp[id].speed / 1000; //0.1; //fabsf(pSCA->Position_Real - position)/1000;
+		mp[id].step = mp[id].speed / 1000; //0.1; //__fabs(pSCA->Position_Real - position)/1000;
 		mp[id].target = position;
 		switch (id)
 		{
@@ -364,15 +364,21 @@ char calculate_inverse(float x4, float y4, float z4, float *t1, float *t2, float
 		float tmp_a = sqrtf(x4 * x4 + y4 * y4 - tmp_b * tmp_b);
 
 		float t1_array[5];
+		float t1_sin_value = (tmp_a * y4 - tmp_b * x4) / (x4 * x4 + y4 * y4);
+		if (__fabs(t1_sin_value) > 1)
+		{
+			return 2;
+		}
 		//calculate the theta 1 when tmp_a > 0
-		float t1_tmp = asinf((tmp_a * y4 - tmp_b * x4) / (x4 * x4 + y4 * y4));
+		float t1_tmp = asinf(t1_sin_value);
 		t1_array[1] = R2A(t1_tmp) > 180 ? t1_tmp - 360 : R2A(t1_tmp);
 		t1_array[2] = (180 - R2A(t1_tmp)) > 180 ? 180 - R2A(t1_tmp) - 360 : 180 - R2A(t1_tmp);
 		//printf("tmp t1 1 2 is       %f      %f\n", t1_array[1], t1_array[2]);
 
 		//calculate the theta1 when a < 0
 		tmp_a = -tmp_a;
-		t1_tmp = asinf((tmp_a * y4 - tmp_b * x4) / (x4 * x4 + y4 * y4));
+		t1_sin_value = (tmp_a * y4 - tmp_b * x4) / (x4 * x4 + y4 * y4);
+		t1_tmp = asinf(t1_sin_value);
 		t1_array[3] = R2A(t1_tmp) > 180 ? t1_tmp - 360 : R2A(t1_tmp);
 		t1_array[4] = (180 - R2A(t1_tmp)) > 180 ? 180 - R2A(t1_tmp) - 360 : 180 - R2A(t1_tmp);
 		//printf("tmp t1 3 4 is       %f      %f\n", t1_array[3], t1_array[4]);
@@ -388,6 +394,10 @@ char calculate_inverse(float x4, float y4, float z4, float *t1, float *t2, float
 			}
 		}
 		float _t1 = t1_array[index];
+		if (x4 * x4 + y4 * y4 - tmp_b * tmp_b < 0)
+		{
+			return 3;
+		}
 		if (index == 1 || index == 2)
 		{
 			a_dir = 1;
@@ -402,10 +412,14 @@ char calculate_inverse(float x4, float y4, float z4, float *t1, float *t2, float
 		*t1 = _t1;
 
 		float t3_array[3];
+		if (__fabs((x4 * x4 + y4 * y4 + z4 * z4 - tmp_b * tmp_b - L2 * L2 - L3 * L3) / 2 / L2 / L3) > 1)
+		{
+			return 4;
+		}
 		float _t3 = acosf((x4 * x4 + y4 * y4 + z4 * z4 - tmp_b * tmp_b - L2 * L2 - L3 * L3) / 2 / L2 / L3);
 		t3_array[1] = R2A(_t3);
 		t3_array[2] = 180 + R2A(_t3) > 180 ? -R2A(_t3) : 180 + R2A(_t3);
-		//printf("theta 3 1  2  %f, %f\n", t3_array[1], t3_array[2]);
+		printf("theta 3   %f, %f\n", t3_array[1], t3_array[2]);
 
 		//find the nearest
 		_t3 = __fabs(ct3 - t3_array[1]) < __fabs(ct3 - t3_array[2]) ? t3_array[1] : t3_array[2];
@@ -415,13 +429,17 @@ char calculate_inverse(float x4, float y4, float z4, float *t1, float *t2, float
 		float mod = sqrtf(L3 * L3 + L2 * L2 + 2 * L2 * L3 * cosf(A2R(_t3)));
 
 		float t2_array[5];
+		if (__fabs(tmp_a / mod) > 1 || __fabs((L3 * cosf(A2R(_t3)) + L2) / mod) > 1)
+		{
+			return 5;
+		}
 		float tmpt2 = acosf(tmp_a / mod);
 		float tmpt2_0 = acosf((L3 * cosf(A2R(_t3)) + L2) / mod);
 
-		t2_array[1] = tmpt2 - tmpt2_0;
-		t2_array[2] = tmpt2 + tmpt2_0;
-		t2_array[3] = -tmpt2 - tmpt2_0;
-		t2_array[4] = -tmpt2 + tmpt2_0;
+		t2_array[1] = (tmpt2 - tmpt2_0) > Pi ? (tmpt2 - tmpt2_0) - 2 * Pi : (tmpt2 - tmpt2_0);
+		t2_array[2] = (tmpt2 + tmpt2_0) > Pi ? (tmpt2 + tmpt2_0) - 2 * Pi : (tmpt2 + tmpt2_0);
+		t2_array[3] = (-tmpt2 - tmpt2_0) > Pi ? (-tmpt2 - tmpt2_0) - 2 * Pi : (-tmpt2 - tmpt2_0);
+		t2_array[4] = (-tmpt2 + tmpt2_0) > Pi ? (-tmpt2 + tmpt2_0) - 2 * Pi : (-tmpt2 + tmpt2_0);
 
 		printf("t2 %f,   %f   %f   %f\n", R2A(t2_array[1]), R2A(t2_array[2]), R2A(t2_array[3]), R2A(t2_array[4]));
 		//find the nearest
@@ -813,9 +831,9 @@ static void CMD_Handler(uint8_t cmd)
 			float x = 0, y = 0, z = 0;
 			calculate_position_xyz(t1, t2, t3, t4, &x, &y, &z);
 			printf("position   :  %f,   %f,    %f\n", x, y, z);
-			printf("current angle      :  %f,   %f,    %f   %f\n", t1, t2, t3,t4);
+			printf("current angle      :  %f,   %f,    %f   %f\n", t1, t2, t3, t4);
 			calculate_inverse(x, y, z, &t1, &t2, &t3, &t4);
-			printf("target  angle      :  %f,   %f,    %f   %f\n", t1, t2, t3,t4);
+			printf("target  angle      :  %f,   %f,    %f   %f\n", t1, t2, t3, t4);
 		}
 		break;
 	}
@@ -852,20 +870,33 @@ static void CMD_Handler(uint8_t cmd)
 			t2 = __fabs(t2) < 0.01 ? 0 : t2;
 			t3 = __fabs(t3) < 0.01 ? 0 : t3;
 			t4 = __fabs(t4) < 0.01 ? 0 : t4;
-			float sv1,sv2,sv3,sv4;
-			calculate_inverse(c39_x + 0.5, c39_y, c39_z, &sv1, &sv2, &sv3, &sv4);
-			printf("angle      :  %f,   %f,    %f\n", sv1, sv2, sv3);
-			//calculate the speed
-			float sp1=__fabs(sv1-t1)/0.05;
-			float sp2=__fabs(sv2-t2)/0.05;
-			float sp3=__fabs(sv3-t3)/0.05;
-			float sp4=__fabs(sv4-t4)/0.05;
-			sp1=sp1>30?30:sp1;
-			sp2=sp2>30?30:sp2;
-			sp3=sp3>30?30:sp3;
-			printf("speed    %f   %f   %f   %f\n",sp1,sp2,sp3,sp4);
-			angle_act_position(sv1, sv2, sv3, sv4, sp1, sp2, sp3, sp4);
-			c39_x += 0.5;
+			float sv1, sv2, sv3, sv4;
+			char res = calculate_inverse(c39_x + 1, c39_y, c39_z, &sv1, &sv2, &sv3, &sv4);
+			if (res == 0)
+			{
+
+				printf("angle      :  %f,   %f,    %f   %f\n", sv1, sv2, sv3, sv4);
+				//calculate the speed
+				float sp1 = __fabs(sv1 - t1) / 0.05;
+				float sp2 = __fabs(sv2 - t2) / 0.05;
+				float sp3 = __fabs(sv3 - t3) / 0.05;
+				float sp4 = __fabs(sv4 - t4) / 0.05;
+				sp1 = sp1 > 30 ? 30 : sp1;
+				sp2 = sp2 > 30 ? 30 : sp2;
+				sp3 = sp3 > 30 ? 30 : sp3;
+				sp4 = sp4 > 100 ? 100 : sp4;
+				sv1 = __fabs(sv1) < 0.1 ? 0 : sv1;
+				sv2 = __fabs(sv2) < 0.1 ? 0 : sv2;
+				sv3 = __fabs(sv3) < 0.1 ? 0 : sv3;
+				sv4 = __fabs(sv4) < 0.1 ? 0 : sv4;
+				printf("speed    %f   %f   %f   %f\n", sp1, sp2, sp3, sp4);
+				angle_act_position(sv1, sv2, sv3, sv4, sp1, sp2, sp3, sp4);
+				c39_x += 1;
+			}
+			else
+			{
+				printf("no inverse out of range\n");
+			}
 		}
 		break;
 	}
@@ -883,20 +914,357 @@ static void CMD_Handler(uint8_t cmd)
 			t2 = __fabs(t2) < 0.01 ? 0 : t2;
 			t3 = __fabs(t3) < 0.01 ? 0 : t3;
 			t4 = __fabs(t4) < 0.01 ? 0 : t4;
-			float sv1,sv2,sv3,sv4;
-			calculate_inverse(c39_x - 0.5, c39_y, c39_z, &sv1, &sv2, &sv3, &sv4);
-			printf("angle      :  %f,   %f,    %f\n", sv1, sv2, sv3);
-			//calculate the speed
-			float sp1=__fabs(sv1-t1)/0.05;
-			float sp2=__fabs(sv2-t2)/0.05;
-			float sp3=__fabs(sv3-t3)/0.05;
-			float sp4=__fabs(sv4-t4)/0.05;
-			sp1=sp1>30?30:sp1;
-			sp2=sp2>30?30:sp2;
-			sp3=sp3>30?30:sp3;
-			printf("speed    %f   %f   %f   %f\n",sp1,sp2,sp3,sp4);
-			angle_act_position(sv1, sv2, sv3, sv4, sp1, sp2, sp3, sp4);
-			c39_x -= 0.5;
+			float sv1, sv2, sv3, sv4;
+			char res = calculate_inverse(c39_x - 1, c39_y, c39_z, &sv1, &sv2, &sv3, &sv4);
+			if (res == 0)
+			{
+
+				printf("angle      :  %f,   %f,    %f    %f\n", sv1, sv2, sv3, sv4);
+				//calculate the speed
+				float sp1 = __fabs(sv1 - t1) / 0.05;
+				float sp2 = __fabs(sv2 - t2) / 0.05;
+				float sp3 = __fabs(sv3 - t3) / 0.05;
+				float sp4 = __fabs(sv4 - t4) / 0.05;
+				sp1 = sp1 > 30 ? 30 : sp1;
+				sp2 = sp2 > 30 ? 30 : sp2;
+				sp3 = sp3 > 30 ? 30 : sp3;
+				sp4 = sp4 > 100 ? 100 : sp4;
+				printf("speed    %f   %f   %f   %f\n", sp1, sp2, sp3, sp4);
+				angle_act_position(sv1, sv2, sv3, sv4, sp1, sp2, sp3, sp4);
+				c39_x -= 1;
+			}
+			else
+			{
+				printf("no inverse out of range\n");
+			}
+		}
+		break;
+	}
+	case 42:
+	{
+		float t1, t2, t3, t4;
+		char res = position_2_angle(&t1, &t2, &t3, &t4);
+		if (res != 0)
+		{
+			printf(" error while in processing position to angle\n");
+		}
+		else
+		{
+			t1 = __fabs(t1) < 0.01 ? 0 : t1;
+			t2 = __fabs(t2) < 0.01 ? 0 : t2;
+			t3 = __fabs(t3) < 0.01 ? 0 : t3;
+			t4 = __fabs(t4) < 0.01 ? 0 : t4;
+			float sv1, sv2, sv3, sv4;
+			char res = calculate_inverse(c39_x + 30, c39_y, c39_z, &sv1, &sv2, &sv3, &sv4);
+			if (res == 0)
+			{
+
+				printf("angle      :  %f,   %f,    %f    %f\n", sv1, sv2, sv3, sv4);
+				//calculate the speed
+				float sp1 = __fabs(sv1 - t1) / 0.1;
+				float sp2 = __fabs(sv2 - t2) / 0.1;
+				float sp3 = __fabs(sv3 - t3) / 0.1;
+				float sp4 = __fabs(sv4 - t4) / 0.1;
+				sp1 = sp1 > 30 ? 30 : sp1;
+				sp2 = sp2 > 30 ? 30 : sp2;
+				sp3 = sp3 > 30 ? 30 : sp3;
+				sp4 = sp4 > 100 ? 100 : sp4;
+				printf("speed    %f   %f   %f   %f\n", sp1, sp2, sp3, sp4);
+				angle_act_position(sv1, sv2, sv3, sv4, sp1, sp2, sp3, sp4);
+				c39_x += 30;
+			}
+			else
+			{
+				printf("no inverse out of range\n");
+			}
+		}
+		break;
+	}
+	case 43:
+	{
+		float t1, t2, t3, t4;
+		char res = position_2_angle(&t1, &t2, &t3, &t4);
+		if (res != 0)
+		{
+			printf(" error while in processing position to angle\n");
+		}
+		else
+		{
+			t1 = __fabs(t1) < 0.01 ? 0 : t1;
+			t2 = __fabs(t2) < 0.01 ? 0 : t2;
+			t3 = __fabs(t3) < 0.01 ? 0 : t3;
+			t4 = __fabs(t4) < 0.01 ? 0 : t4;
+			float sv1, sv2, sv3, sv4;
+			char res = calculate_inverse(c39_x - 30, c39_y, c39_z, &sv1, &sv2, &sv3, &sv4);
+			if (res == 0)
+			{
+
+				printf("angle      :  %f,   %f,    %f    %f\n", sv1, sv2, sv3, sv4);
+				//calculate the speed
+				float sp1 = __fabs(sv1 - t1) / 0.1;
+				float sp2 = __fabs(sv2 - t2) / 0.1;
+				float sp3 = __fabs(sv3 - t3) / 0.1;
+				float sp4 = __fabs(sv4 - t4) / 0.1;
+				sp1 = sp1 > 30 ? 30 : sp1;
+				sp2 = sp2 > 30 ? 30 : sp2;
+				sp3 = sp3 > 30 ? 30 : sp3;
+				sp4 = sp4 > 100 ? 100 : sp4;
+				printf("speed    %f   %f   %f   %f\n", sp1, sp2, sp3, sp4);
+				angle_act_position(sv1, sv2, sv3, sv4, sp1, sp2, sp3, sp4);
+				c39_x -= 30;
+			}
+			else
+			{
+				printf("no inverse out of range\n");
+			}
+		}
+		break;
+	}
+	case 44:
+	{
+		float t1, t2, t3, t4;
+		char res = position_2_angle(&t1, &t2, &t3, &t4);
+		if (res != 0)
+		{
+			printf(" error while in processing position to angle\n");
+		}
+		else
+		{
+			t1 = __fabs(t1) < 0.01 ? 0 : t1;
+			t2 = __fabs(t2) < 0.01 ? 0 : t2;
+			t3 = __fabs(t3) < 0.01 ? 0 : t3;
+			t4 = __fabs(t4) < 0.01 ? 0 : t4;
+			float sv1, sv2, sv3, sv4;
+			char res = calculate_inverse(c39_x, c39_y + 30, c39_z, &sv1, &sv2, &sv3, &sv4);
+			if (res == 0)
+			{
+
+				printf("angle      :  %f,   %f,    %f    %f\n", sv1, sv2, sv3, sv4);
+				//calculate the speed
+				float sp1 = __fabs(sv1 - t1) / 0.1;
+				float sp2 = __fabs(sv2 - t2) / 0.1;
+				float sp3 = __fabs(sv3 - t3) / 0.1;
+				float sp4 = __fabs(sv4 - t4) / 0.1;
+				sp1 = sp1 > 30 ? 30 : sp1;
+				sp2 = sp2 > 30 ? 30 : sp2;
+				sp3 = sp3 > 30 ? 30 : sp3;
+				sp4 = sp4 > 100 ? 100 : sp4;
+				printf("speed    %f   %f   %f   %f\n", sp1, sp2, sp3, sp4);
+				angle_act_position(sv1, sv2, sv3, sv4, sp1, sp2, sp3, sp4);
+				c39_y += 30;
+			}
+			else
+			{
+				printf("no inverse out of range\n");
+			}
+		}
+		break;
+	}
+	case 45:
+	{
+		float t1, t2, t3, t4;
+		char res = position_2_angle(&t1, &t2, &t3, &t4);
+		if (res != 0)
+		{
+			printf(" error while in processing position to angle\n");
+		}
+		else
+		{
+			t1 = __fabs(t1) < 0.01 ? 0 : t1;
+			t2 = __fabs(t2) < 0.01 ? 0 : t2;
+			t3 = __fabs(t3) < 0.01 ? 0 : t3;
+			t4 = __fabs(t4) < 0.01 ? 0 : t4;
+			float sv1, sv2, sv3, sv4;
+			char res = calculate_inverse(c39_x, c39_y - 30, c39_z, &sv1, &sv2, &sv3, &sv4);
+			if (res == 0)
+			{
+
+				printf("angle      :  %f,   %f,    %f    %f\n", sv1, sv2, sv3, sv4);
+				//calculate the speed
+				float sp1 = __fabs(sv1 - t1) / 0.1;
+				float sp2 = __fabs(sv2 - t2) / 0.1;
+				float sp3 = __fabs(sv3 - t3) / 0.1;
+				float sp4 = __fabs(sv4 - t4) / 0.1;
+				sp1 = sp1 > 30 ? 30 : sp1;
+				sp2 = sp2 > 30 ? 30 : sp2;
+				sp3 = sp3 > 30 ? 30 : sp3;
+				sp4 = sp4 > 100 ? 100 : sp4;
+				printf("speed    %f   %f   %f   %f\n", sp1, sp2, sp3, sp4);
+				angle_act_position(sv1, sv2, sv3, sv4, sp1, sp2, sp3, sp4);
+				c39_y -= 30;
+			}
+			else
+			{
+				printf("no inverse out of range \n");
+			}
+		}
+		break;
+	}
+	case 46:
+	{
+		float t1, t2, t3, t4;
+		char res = position_2_angle(&t1, &t2, &t3, &t4);
+		if (res != 0)
+		{
+			printf(" error while in processing position to angle\n");
+		}
+		else
+		{
+			t1 = __fabs(t1) < 0.01 ? 0 : t1;
+			t2 = __fabs(t2) < 0.01 ? 0 : t2;
+			t3 = __fabs(t3) < 0.01 ? 0 : t3;
+			t4 = __fabs(t4) < 0.01 ? 0 : t4;
+			float sv1, sv2, sv3, sv4;
+			char res = calculate_inverse(c39_x, c39_y, c39_z + 30, &sv1, &sv2, &sv3, &sv4);
+			if (res == 0)
+			{
+				printf("angle      :  %f,   %f,    %f    %f\n", sv1, sv2, sv3, sv4);
+				//calculate the speed
+				float sp1 = __fabs(sv1 - t1) / 0.1;
+				float sp2 = __fabs(sv2 - t2) / 0.1;
+				float sp3 = __fabs(sv3 - t3) / 0.1;
+				float sp4 = __fabs(sv4 - t4) / 0.1;
+				sp1 = sp1 > 30 ? 30 : sp1;
+				sp2 = sp2 > 30 ? 30 : sp2;
+				sp3 = sp3 > 30 ? 30 : sp3;
+				sp4 = sp4 > 100 ? 100 : sp4;
+				printf("speed    %f   %f   %f   %f\n", sp1, sp2, sp3, sp4);
+				angle_act_position(sv1, sv2, sv3, sv4, sp1, sp2, sp3, sp4);
+				c39_z += 30;
+			}
+			else
+			{
+				printf("no inverse out of range\n");
+			}
+		}
+		break;
+	}
+	case 47:
+	{
+		float t1, t2, t3, t4;
+		char res = position_2_angle(&t1, &t2, &t3, &t4);
+		if (res != 0)
+		{
+			printf(" error while in processing position to angle\n");
+		}
+		else
+		{
+			t1 = __fabs(t1) < 0.01 ? 0 : t1;
+			t2 = __fabs(t2) < 0.01 ? 0 : t2;
+			t3 = __fabs(t3) < 0.01 ? 0 : t3;
+			t4 = __fabs(t4) < 0.01 ? 0 : t4;
+			float sv1, sv2, sv3, sv4;
+			char res = calculate_inverse(c39_x, c39_y, c39_z - 30, &sv1, &sv2, &sv3, &sv4);
+			if (res == 0)
+			{
+
+				printf("angle      :  %f,   %f,    %f    %f\n", sv1, sv2, sv3, sv4);
+				//calculate the speed
+				float sp1 = __fabs(sv1 - t1) / 0.1;
+				float sp2 = __fabs(sv2 - t2) / 0.1;
+				float sp3 = __fabs(sv3 - t3) / 0.1;
+				float sp4 = __fabs(sv4 - t4) / 0.1;
+				sp1 = sp1 > 30 ? 30 : sp1;
+				sp2 = sp2 > 30 ? 30 : sp2;
+				sp3 = sp3 > 30 ? 30 : sp3;
+				sp4 = sp4 > 100 ? 100 : sp4;
+				printf("speed    %f   %f   %f   %f\n", sp1, sp2, sp3, sp4);
+				angle_act_position(sv1, sv2, sv3, sv4, sp1, sp2, sp3, sp4);
+				c39_z -= 30;
+			}
+			else
+			{
+				printf("no inverse , out of range\n");
+			}
+		}
+		break;
+	}
+	case 48:
+	{
+		angle_act_position(0, 0, 0, 0, 50, 50, 50, 50);
+		break;
+	}
+	case 49:
+	{
+		float t1, t2, t3, t4;
+		char res = position_2_angle(&t1, &t2, &t3, &t4);
+		if (res != 0)
+		{
+			printf(" error while in processing position to angle\n");
+		}
+		else
+		{
+			t1 = __fabs(t1) < 0.01 ? 0 : t1;
+			t2 = __fabs(t2) < 0.01 ? 0 : t2;
+			t3 = __fabs(t3) < 0.01 ? 0 : t3;
+			t4 = __fabs(t4) < 0.01 ? 0 : t4;
+			float sv1, sv2, sv3, sv4;
+			char res = calculate_inverse(c39_x - 40, c39_y - 20, c39_z - 30, &sv1, &sv2, &sv3, &sv4);
+			if (res == 0)
+			{
+
+				printf("angle      :  %f,   %f,    %f    %f\n", sv1, sv2, sv3, sv4);
+				//calculate the speed
+				float sp1 = __fabs(sv1 - t1) / 0.1;
+				float sp2 = __fabs(sv2 - t2) / 0.1;
+				float sp3 = __fabs(sv3 - t3) / 0.1;
+				float sp4 = __fabs(sv4 - t4) / 0.1;
+				sp1 = sp1 > 30 ? 30 : sp1;
+				sp2 = sp2 > 30 ? 30 : sp2;
+				sp3 = sp3 > 30 ? 30 : sp3;
+				sp4 = sp4 > 100 ? 100 : sp4;
+				printf("speed    %f   %f   %f   %f\n", sp1, sp2, sp3, sp4);
+				angle_act_position(sv1, sv2, sv3, sv4, sp1, sp2, sp3, sp4);
+				c39_z -= 30;
+				c39_x -= 40;
+				c39_y -= 20;
+			}
+			else
+			{
+				printf("no inverse , out of range\n");
+			}
+		}
+		break;
+	}
+	case 50:
+	{
+		float t1, t2, t3, t4;
+		char res = position_2_angle(&t1, &t2, &t3, &t4);
+		if (res != 0)
+		{
+			printf(" error while in processing position to angle\n");
+		}
+		else
+		{
+			t1 = __fabs(t1) < 0.01 ? 0 : t1;
+			t2 = __fabs(t2) < 0.01 ? 0 : t2;
+			t3 = __fabs(t3) < 0.01 ? 0 : t3;
+			t4 = __fabs(t4) < 0.01 ? 0 : t4;
+			float sv1, sv2, sv3, sv4;
+			char res = calculate_inverse(c39_x + 40, c39_y + 20, c39_z + 30, &sv1, &sv2, &sv3, &sv4);
+			if (res == 0)
+			{
+
+				printf("angle      :  %f,   %f,    %f    %f\n", sv1, sv2, sv3, sv4);
+				//calculate the speed
+				float sp1 = __fabs(sv1 - t1) / 0.1;
+				float sp2 = __fabs(sv2 - t2) / 0.1;
+				float sp3 = __fabs(sv3 - t3) / 0.1;
+				float sp4 = __fabs(sv4 - t4) / 0.1;
+				sp1 = sp1 > 30 ? 30 : sp1;
+				sp2 = sp2 > 30 ? 30 : sp2;
+				sp3 = sp3 > 30 ? 30 : sp3;
+				sp4 = sp4 > 100 ? 100 : sp4;
+				printf("speed    %f   %f   %f   %f\n", sp1, sp2, sp3, sp4);
+				angle_act_position(sv1, sv2, sv3, sv4, sp1, sp2, sp3, sp4);
+				c39_z += 30;
+				c39_x += 40;
+				c39_y += 20;
+			}
+			else
+			{
+				printf("no inverse , out of range\n");
+			}
 		}
 		break;
 	}
