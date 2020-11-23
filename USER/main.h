@@ -4,9 +4,11 @@
 #include "SCA_API.h"
 #include "SCA_APP.h"
 #include "stm32f4xx.h"
+#include "stm32f4xx_crc.h"
 //#include "arm_math.h"
 
 #define DEBUG_OUTPUT 1
+#define LOOP_BUF_LEN 1000
 #define Pi 3.141593f
 #define A2R(angle) (angle * Pi / 180)
 #define R2A(radian) (radian * 180 / Pi)
@@ -39,8 +41,46 @@ extern unsigned int tim4_counter;
 extern unsigned int tim6_counter;
 extern unsigned int tim13_counter;
 extern unsigned int tim14_counter;
+extern u16 frame_index;
 
 extern float pre_angle[5];
+
+extern u8 cmd_buffer[100];
+extern u8 cmd_counter;
+extern u8 cmd_flag;
+extern u8 cmd_shadow_buffer[100];
+extern volatile u16 cmd_len;
+
+typedef struct loop_buffer
+{
+    u8 data;
+    u8 if_processed;
+    struct loop_buffer *next;
+} LOOP_BUFFER;
+
+extern LOOP_BUFFER loop_buf[LOOP_BUF_LEN];
+extern LOOP_BUFFER *loop_head;
+extern LOOP_BUFFER *loop_tail;
+typedef struct cmd_struct
+{
+    u8 cmd_if_correct; //0: correct 1: error
+    u16 cmd_type;      //0: heart beat  1: read 2: set 3: control
+    u16 data_length;
+    u16 cmd_lenght;
+    u16 cmd_index;
+    u16 function_code;
+    u16 target_motor; //bit 0: 1: motor 0 selected 0: motor 0 unselected
+    u8 dir[5];        //0: x+ 1: x- 2: y+ 3: y- 4:z+ 5:z-
+    float rx;
+    float ry;
+    float rz;
+    float px;
+    float py;
+    float pz;
+    float speed[5];
+} CMD_STRUCT;
+
+extern CMD_STRUCT cmd_s;
 
 //rotation matrix
 extern float r1_0[3][3];
@@ -65,6 +105,23 @@ typedef struct motor_parameter
 } MOTOR_PARAMETER;
 
 extern MOTOR_PARAMETER mp[5];
+
+/**
+ * @brief describe the system status, include location, speed, if_rotation
+ * 
+ */
+typedef struct sys_parameter
+{
+    float x;
+    float y;
+    float z;
+    float sp_x;
+    float sp_y;
+    float sp_z;
+    char motor_status[5]; //0: motor stop  1: motor move positive -1: motor move negative
+} SYS_PARAMETER;
+
+extern SYS_PARAMETER sys_p;
 
 /**
  * @brief calculate the rotation matrix
@@ -148,5 +205,32 @@ char calculate_position_xyz(float t1, float t2, float t3, float t4, float *x, fl
  */
 char position_2_angle(float *t1, float *t2, float *t3, float *t4);
 
+/**
+ * @brief calculate the inverse angle
+ * 
+ * @param x4 
+ * @param y4 
+ * @param z4 
+ * @param t1 
+ * @param t2 
+ * @param t3 
+ * @param t4 
+ * @return char 
+ */
 char calculate_inverse(float x4, float y4, float z4, float *t1, float *t2, float *t3, float *t4);
+/**
+ * @brief calculate the crc32
+ * 
+ * @param data_buffer 
+ * @param size 
+ * @return u32 
+ */
+u32 CRC_Cal(u8 *data_buffer, u16 size);
+/**
+ * @brief init the loop buffer for cmd receive
+ * 
+ */
+void init_loop_buf(void);
+
+u8 parse_cmd(CMD_STRUCT *command);
 #endif

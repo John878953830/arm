@@ -43,8 +43,18 @@ float porg_2_1[3][1];
 float porg_3_2[3][1];
 float porg_4_3[3][1];
 MOTOR_PARAMETER mp[5];
-float mmk = 0;
 
+u8 cmd_buffer[100];
+u8 cmd_counter = 0;
+u8 cmd_flag = 0; //1: need to decode cmd  0: no need to decode
+u8 cmd_shadow_buffer[100];
+//volatile u16 cmd_len;
+SYS_PARAMETER sys_p;
+CMD_STRUCT cmd_s;
+LOOP_BUFFER loop_buf[LOOP_BUF_LEN];
+LOOP_BUFFER *loop_head;
+LOOP_BUFFER *loop_tail;
+u16 frame_index = 0;
 float c39_x = 0;
 float c39_y = 0;
 float c39_z = 0;
@@ -54,6 +64,64 @@ float pre_angle[5];
 static void Log(void);
 static void CMD_Handler(uint8_t cmd);
 
+void init_loop_buf(void)
+{
+	int k = 0;
+	for (k = 0; k < LOOP_BUF_LEN; k++)
+	{
+		if (k != LOOP_BUF_LEN - 1)
+		{
+			loop_buf[k].data = 0;
+			loop_buf[k].if_processed = 0;
+			loop_buf[k].next = &loop_buf[k + 1];
+		}
+		else
+		{
+			loop_buf[k].data = 0;
+			loop_buf[k].if_processed = 0;
+			loop_buf[k].next = &loop_buf[0];
+		}
+	}
+	loop_head = &loop_buf[0];
+	loop_tail = loop_head;
+}
+
+u32 CRC_Cal(u8 *data_buffer, u16 size)
+{
+	if (size == 0 || size > 100)
+	{
+		return 0;
+	}
+	u32 data[25];
+	u8 *p = data_buffer;
+	u16 k = 0;
+	u16 i = 0;
+	for (k = 0; k < size;)
+	{
+		if (k + 4 > size - 1)
+		{
+			u8 tp0 = p[k];
+			u8 tp1 = k + 1 >= size ? 0 : p[k + 1];
+			u8 tp2 = k + 2 >= size ? 0 : p[k + 2];
+			u8 tp3 = k + 3 >= size ? 0 : p[k + 3];
+			;
+			data[i++] = (((u32)tp0) << 24) | (((u32)tp1) << 16) | (((u32)tp2) << 8) | (((u32)tp3));
+			break;
+		}
+		else
+		{
+			data[i++] = (((u32)p[k]) << 24) | (((u32)p[k + 1]) << 16) | (((u32)p[k + 2]) << 8) | (((u32)p[k + 3]));
+			k += 4;
+		}
+	}
+	u32 tmp = 0;
+	CRC_ResetDR();
+	for (k = 0; k < i; k++)
+	{
+		tmp = CRC_CalcCRC(data[k]);
+	}
+	return tmp;
+}
 void calculate_r_1_0(float t1)
 {
 	r1_0[0][0] = cosf(A2R(t1));
@@ -148,6 +216,9 @@ void motor_parameter_init(void)
 	mp[2].angle_dir = -1;
 	mp[3].angle_dir = 1;
 	mp[4].angle_dir = -1;
+
+	//init the cmd s
+	cmd_s.cmd_index = 0;
 	return;
 }
 
@@ -381,7 +452,7 @@ char calculate_inverse(float x4, float y4, float z4, float *t1, float *t2, float
 		t1_tmp = asinf(t1_sin_value);
 		t1_array[3] = R2A(t1_tmp) > 180 ? t1_tmp - 360 : R2A(t1_tmp);
 		t1_array[4] = (180 - R2A(t1_tmp)) > 180 ? 180 - R2A(t1_tmp) - 360 : 180 - R2A(t1_tmp);
-		//printf("tmp t1 3 4 is       %f      %f\n", t1_array[3], t1_array[4]);
+		printf("tmp t1    %f      %f    %f    %f\n", t1_array[1], t1_array[2], t1_array[3], t1_array[4]);
 		//find the nearest one to t1a
 		char i = 1, index = 1;
 		float tmpt1_f = 370;
@@ -477,6 +548,131 @@ char calculate_inverse(float x4, float y4, float z4, float *t1, float *t2, float
 
 	return 0;
 }
+
+u8 parse_cmd(CMD_STRUCT *command)
+{
+	while (1)
+	{
+		if (loop_head->data == 0xFF && (loop_head->next)->data == 0xFF)
+			break;
+		if (loop_head == loop_tail)
+			return 1;
+		loop_head->data = 0;
+		loop_head->if_processed = 0;
+		loop_head = loop_head->next;
+	}
+
+	if (loop_head->data == 0xFF && (loop_head->next)->data == 0xFF)
+	{
+		cmd_s.cmd_if_correct = 1;
+		//copy out the data
+		u8 tmp_buffer[100];
+		u8 k = 0;
+		loop_head->data = 0;
+		loop_head->if_processed = 0;
+		loop_head = loop_head->next;
+		loop_head->data = 0;
+		loop_head->if_processed = 0;
+		loop_head = loop_head->next;
+		while (loop_head->if_processed == 0)
+		{
+			u16 loop_counter0 = 0;
+			delay_us(2);
+			if (loop_counter0++ > 40)
+			{
+				loop_head->if_processed = 0;
+				loop_head = loop_head->next;
+				return 2;
+			}
+		}
+		tmp_buffer[k++] = loop_head->data;
+		loop_head->if_processed = 0;
+		loop_head = loop_head->next;
+		while (loop_head->if_processed == 0)
+		{
+			u16 loop_counter0 = 0;
+			delay_us(2);
+			if (loop_counter0++ > 40)
+			{
+				loop_head->if_processed = 0;
+				loop_head = loop_head->next;
+				return 2;
+			}
+		}
+		tmp_buffer[k++] = loop_head->data;
+		loop_head->if_processed = 0;
+		loop_head = loop_head->next;
+		u16 len = (((u16)tmp_buffer[0]) << 8) | ((u16)tmp_buffer[1]);
+		if (len < 6)
+		{
+			loop_head->if_processed = 0;
+			loop_head = loop_head->next;
+			printf("data length error\n");
+			return 3;
+		}
+		for (; k < len; k++)
+		{
+			u16 loop_counter = 0;
+			while (loop_head->if_processed == 0)
+			{
+				delay_us(2);
+				if (loop_counter++ > 40)
+				{
+					loop_head->if_processed = 0;
+					loop_head = loop_head->next;
+					return 2;
+				}
+			}
+			tmp_buffer[k] = loop_head->data;
+			loop_head->if_processed = 0;
+			loop_head = loop_head->next;
+		}
+		//crc
+		u32 crc_res = CRC_Cal(tmp_buffer, len - 4);
+		printf("CRC result  %x\n", crc_res);
+		u32 data_crc = (((u32)tmp_buffer[len - 4]) << 24) | (((u32)tmp_buffer[len - 3]) << 16) | (((u32)tmp_buffer[len - 2]) << 8) | (((u32)tmp_buffer[len - 1]));
+		if (crc_res != data_crc)
+		{
+			printf("crc error\n");
+			return 4;
+		}
+		//parse the data
+		cmd_s.cmd_if_correct = 0;
+		cmd_s.data_length = len - 4;
+		cmd_s.cmd_index = ((u16)tmp_buffer[2] << 8) | ((u16)tmp_buffer[2]);
+		cmd_s.function_code = tmp_buffer[4];
+		if (cmd_s.function_code >= 1 && cmd_s.function_code <= 4)
+		{
+			printf("control frame, function code  %d\n", cmd_s.function_code);
+			cmd_s.cmd_type = 3;
+		}
+		if (cmd_s.function_code >= 5 && cmd_s.function_code <= 8)
+		{
+			printf("read frame, function code  %d\n", cmd_s.function_code);
+			cmd_s.cmd_type = 1;
+		}
+		if (cmd_s.function_code == 9)
+		{
+			printf("set frame, function code  %d\n", cmd_s.function_code);
+			cmd_s.cmd_type = 2;
+		}
+		if (len == 6)
+		{
+			printf("heartbeat frame, function code  %d\n", cmd_s.function_code);
+			cmd_s.cmd_type = 0;
+		}
+
+		return 0;
+	}
+	else
+	{
+		loop_head->data = 0;
+		loop_head->if_processed = 0;
+		loop_head = loop_head->next;
+	}
+
+	return 0;
+}
 /**
   * @功	能	主程序入口
   * @参	数	无
@@ -490,9 +686,10 @@ int main(void)
 	/* 等待执行器稳定 */
 	delay_ms(500);
 
+	RCC_AHB1PeriphClockCmd(RCC_AHB1Periph_CRC, ENABLE);
+
 	/* 串口1打印LOG信息 */
 	Log();
-	mmk = sinf(A2R(30));
 
 	TIM2_init(100 - 1, 9000 - 1);
 
@@ -505,6 +702,7 @@ int main(void)
 	//TIM_Cmd(TIM6, ENABLE);
 
 	motor_parameter_init();
+	init_loop_buf();
 
 	/* 等待命令传入 */
 	while (1)
@@ -513,6 +711,18 @@ int main(void)
 		{
 			CMD_Handler(cmd);
 			cmd = 0;
+		}
+		if (__fabs(((u32)loop_tail) - ((u32)loop_head)) > 8)
+		{
+			if (parse_cmd(&cmd_s) != 0)
+			{
+				//printf("no frame\n");
+			}
+			else
+			{
+				frame_index++;
+				printf("receive 1 frame, index   %u\n", frame_index);
+			}
 		}
 		if_error = update_status();
 		if (if_need_lookup_monitor)

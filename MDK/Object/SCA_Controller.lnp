@@ -19,6 +19,7 @@
 ".\object\stm32f4xx_usart.o"
 ".\object\stm32f4xx_can.o"
 ".\object\stm32f4xx_tim.o"
+".\object\stm32f4xx_crc.o"
 "D:\Keil_v5\ARM\PACK\ARM\CMSIS\5.6.0\CMSIS\DSP\Lib\ARM\arm_cortexM4lf_math.lib"
 ".\object\arm_nn_activations_q15.o"
 ".\object\arm_nn_activations_q7.o"

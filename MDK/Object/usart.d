@@ -40,3 +40,11 @@
 .\object\usart.o: ..\FWLIB\inc\stm32f4xx_sai.h
 .\object\usart.o: D:\Keil_v5\ARM\ARMCC\Bin\..\include\stdio.h
 .\object\usart.o: ..\SYSTEM\usart.h
+.\object\usart.o: ..\USER\main.h
+.\object\usart.o: ..\BSP\bsp.h
+.\object\usart.o: ..\SYSTEM\delay.h
+.\object\usart.o: ..\BSP\bsp_can.h
+.\object\usart.o: ..\SCA\SCA_API.h
+.\object\usart.o: ..\SCA\SCA_Protocol.h
+.\object\usart.o: ..\SCA\SCA_APP.h
+.\object\usart.o: D:\Keil_v5\ARM\ARMCC\Bin\..\include\string.h
