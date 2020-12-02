@@ -1080,20 +1080,21 @@ static void CMD_Handler(uint8_t cmd)
 			t2 = __fabs(t2) < 0.01 ? 0 : t2;
 			t3 = __fabs(t3) < 0.01 ? 0 : t3;
 			t4 = __fabs(t4) < 0.01 ? 0 : t4;
+			calculate_position_xyz(t1, t2, t3, t4, &c39_x, &c39_y, &c39_z);
 			float sv1, sv2, sv3, sv4;
-			char res = calculate_inverse(c39_x + 1, c39_y, c39_z, &sv1, &sv2, &sv3, &sv4);
+			char res = calculate_inverse(c39_x + 5, c39_y, c39_z, &sv1, &sv2, &sv3, &sv4);
 			if (res == 0)
 			{
 
 				printf("angle      :  %f,   %f,    %f   %f\n", sv1, sv2, sv3, sv4);
 				//calculate the speed
-				float sp1 = __fabs(sv1 - t1) / 0.05;
-				float sp2 = __fabs(sv2 - t2) / 0.05;
-				float sp3 = __fabs(sv3 - t3) / 0.05;
-				float sp4 = __fabs(sv4 - t4) / 0.05;
-				sp1 = sp1 > 30 ? 30 : sp1;
-				sp2 = sp2 > 30 ? 30 : sp2;
-				sp3 = sp3 > 30 ? 30 : sp3;
+				float sp1 = __fabs(sv1 - t1) / 0.1;
+				float sp2 = __fabs(sv2 - t2) / 0.1;
+				float sp3 = __fabs(sv3 - t3) / 0.1;
+				float sp4 = __fabs(sv4 - t4) / 0.1;
+				sp1 = sp1 > 100 ? 100 : sp1;
+				sp2 = sp2 > 100 ? 100 : sp2;
+				sp3 = sp3 > 100 ? 100 : sp3;
 				sp4 = sp4 > 100 ? 100 : sp4;
 				sv1 = __fabs(sv1) < 0.1 ? 0 : sv1;
 				sv2 = __fabs(sv2) < 0.1 ? 0 : sv2;
@@ -1124,20 +1125,21 @@ static void CMD_Handler(uint8_t cmd)
 			t2 = __fabs(t2) < 0.01 ? 0 : t2;
 			t3 = __fabs(t3) < 0.01 ? 0 : t3;
 			t4 = __fabs(t4) < 0.01 ? 0 : t4;
+			calculate_position_xyz(t1, t2, t3, t4, &c39_x, &c39_y, &c39_z);
 			float sv1, sv2, sv3, sv4;
-			char res = calculate_inverse(c39_x - 1, c39_y, c39_z, &sv1, &sv2, &sv3, &sv4);
+			char res = calculate_inverse(c39_x - 5, c39_y, c39_z, &sv1, &sv2, &sv3, &sv4);
 			if (res == 0)
 			{
 
 				printf("angle      :  %f,   %f,    %f    %f\n", sv1, sv2, sv3, sv4);
 				//calculate the speed
-				float sp1 = __fabs(sv1 - t1) / 0.05;
-				float sp2 = __fabs(sv2 - t2) / 0.05;
-				float sp3 = __fabs(sv3 - t3) / 0.05;
-				float sp4 = __fabs(sv4 - t4) / 0.05;
-				sp1 = sp1 > 30 ? 30 : sp1;
-				sp2 = sp2 > 30 ? 30 : sp2;
-				sp3 = sp3 > 30 ? 30 : sp3;
+				float sp1 = __fabs(sv1 - t1) / 0.1;
+				float sp2 = __fabs(sv2 - t2) / 0.1;
+				float sp3 = __fabs(sv3 - t3) / 0.1;
+				float sp4 = __fabs(sv4 - t4) / 0.1;
+				sp1 = sp1 > 100 ? 100 : sp1;
+				sp2 = sp2 > 100 ? 100 : sp2;
+				sp3 = sp3 > 100 ? 100 : sp3;
 				sp4 = sp4 > 100 ? 100 : sp4;
 				printf("speed    %f   %f   %f   %f\n", sp1, sp2, sp3, sp4);
 				angle_act_position(sv1, sv2, sv3, sv4, sp1, sp2, sp3, sp4);

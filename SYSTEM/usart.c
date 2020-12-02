@@ -86,8 +86,8 @@ void USART1_IRQHandler(void) //串口1中断服务程序
 		loop_tail->if_processed = 1;
 		loop_tail = loop_tail->next;
 
-		//if (cmd == 0)
-		//cmd = USART1->DR;
+		if (cmd == 0)
+		cmd = USART1->DR;
 	}
 
 	if (USART_GetITStatus(USART1, USART_IT_IDLE) != RESET)

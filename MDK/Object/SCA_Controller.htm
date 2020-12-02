@@ -3,7 +3,7 @@
 <title>Static Call Graph - [.\Object\SCA_Controller.axf]</title></head>
 <body><HR>
 <H1>Static Call Graph for image .\Object\SCA_Controller.axf</H1><HR>
-<BR><P>#&#060CALLGRAPH&#062# ARM Linker, 5060422: Last Updated: Mon Nov 23 19:56:36 2020
+<BR><P>#&#060CALLGRAPH&#062# ARM Linker, 5060422: Last Updated: Wed Dec 02 10:27:17 2020
 <BR><P>
 <H3>Maximum Stack Usage =        680 bytes + Unknown(Functions without stacksize, Cycles, Untraceable Function Pointers)</H3><H3>
 Call chain for Maximum Stack Depth:</H3>
@@ -445,7 +445,7 @@ Global Symbols
 <BR>[Called By]<UL><LI><a href="#[85]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;main
 </UL>
 
-<P><STRONG><a name="[85]"></a>main</STRONG> (Thumb, 300 bytes, Stack size 8 bytes, main.o(.text))
+<P><STRONG><a name="[85]"></a>main</STRONG> (Thumb, 252 bytes, Stack size 8 bytes, main.o(.text))
 <BR><BR>[Stack]<UL><LI>Max Depth = 680 + Unknown Stack Size
 <LI>Call Chain = main &rArr; CMD_Handler &rArr; SCA_Lookup &rArr; lookupActuators &rArr; __2printf &rArr; _printf_char_file &rArr; _printf_char_common &rArr; __printf
 </UL>
@@ -1906,7 +1906,7 @@ Global Symbols
 <BR>[Called By]<UL><LI><a href="#[b5]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;BSP_Init
 </UL>
 
-<P><STRONG><a name="[33]"></a>USART1_IRQHandler</STRONG> (Thumb, 62 bytes, Stack size 8 bytes, usart.o(.text))
+<P><STRONG><a name="[33]"></a>USART1_IRQHandler</STRONG> (Thumb, 76 bytes, Stack size 8 bytes, usart.o(.text))
 <BR><BR>[Stack]<UL><LI>Max Depth = 24<LI>Call Chain = USART1_IRQHandler &rArr; USART_GetITStatus
 </UL>
 <BR>[Calls]<UL><LI><a href="#[150]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;USART_GetITStatus
@@ -3695,7 +3695,7 @@ Local Symbols
 <LI><a href="#[af]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;CMD_Handler
 </UL>
 
-<P><STRONG><a name="[af]"></a>CMD_Handler</STRONG> (Thumb, 13320 bytes, Stack size 128 bytes, main.o(.text))
+<P><STRONG><a name="[af]"></a>CMD_Handler</STRONG> (Thumb, 13390 bytes, Stack size 128 bytes, main.o(.text))
 <BR><BR>[Stack]<UL><LI>Max Depth = 672 + Unknown Stack Size
 <LI>Call Chain = CMD_Handler &rArr; SCA_Lookup &rArr; lookupActuators &rArr; __2printf &rArr; _printf_char_file &rArr; _printf_char_common &rArr; __printf
 </UL>
