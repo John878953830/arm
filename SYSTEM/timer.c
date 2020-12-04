@@ -259,7 +259,7 @@ void TIM3_IRQHandler(void)
         pSCA = getInstance(1);
         if (pSCA != NULL)
         {
-            if (__fabs(mp[1].target - pSCA->Position_Real) > (mp[1].step/2))//
+            if (__fabs(mp[1].target - pSCA->Position_Real) > (mp[1].step / 2)) //
             {
                 motor_act(1, mp[1].step, mp[1].target - pSCA->Position_Real > 0 ? 0 : 1);
                 tim3_counter++;
@@ -267,7 +267,7 @@ void TIM3_IRQHandler(void)
             else
             {
                 TIM_Cmd(TIM3, DISABLE);
-							  setPosition(1, mp[1].target);
+                setPosition(1, mp[1].target);
             }
         }
     }
@@ -282,7 +282,7 @@ void TIM4_IRQHandler(void)
         pSCA = getInstance(2);
         if (pSCA != NULL)
         {
-            if (__fabs(mp[2].target - pSCA->Position_Real) > (mp[2].step/2))//
+            if (__fabs(mp[2].target - pSCA->Position_Real) > (mp[2].step / 2)) //
             {
                 motor_act(2, mp[2].step, mp[2].target - pSCA->Position_Real > 0 ? 0 : 1);
                 tim4_counter++;
@@ -290,7 +290,7 @@ void TIM4_IRQHandler(void)
             else
             {
                 TIM_Cmd(TIM4, DISABLE);
-							  setPosition(2, mp[2].target);
+                setPosition(2, mp[2].target);
             }
         }
     }
@@ -301,7 +301,15 @@ void TIM6_DAC_IRQHandler(void)
 {
     if (TIM_GetITStatus(TIM6, TIM_IT_Update) == SET)
     {
-        //if_error = update_status();
+        if (__fabs(current_position.x - cmd_s.px) < step_value.sx && __fabs(current_position.y - cmd_s.py) < step_value.sy && __fabs(current_position.z - cmd_s.pz) < step_value.sz)
+        {
+            TIM_Cmd(TIM6, DISABLE);
+        }
+        else
+        {
+            //update the flag
+            update_next_pos_flag = 1;
+        }
     }
     TIM_ClearITPendingBit(TIM6, TIM_IT_Update);
 }
@@ -314,7 +322,7 @@ void TIM8_UP_TIM13_IRQHandler(void)
         pSCA = getInstance(3);
         if (pSCA != NULL)
         {
-            if (__fabs(mp[3].target - pSCA->Position_Real) > (mp[3].step/2))//
+            if (__fabs(mp[3].target - pSCA->Position_Real) > (mp[3].step / 2)) //
             {
                 motor_act(3, mp[3].step, mp[3].target - pSCA->Position_Real > 0 ? 0 : 1);
                 tim13_counter++;
@@ -322,7 +330,7 @@ void TIM8_UP_TIM13_IRQHandler(void)
             else
             {
                 TIM_Cmd(TIM13, DISABLE);
-							  setPosition(3, mp[3].target);
+                setPosition(3, mp[3].target);
             }
         }
     }
@@ -337,7 +345,7 @@ void TIM8_TRG_COM_TIM14_IRQHandler(void)
         pSCA = getInstance(4);
         if (pSCA != NULL)
         {
-            if (__fabs(mp[4].target - pSCA->Position_Real) > (mp[4].step/2))//
+            if (__fabs(mp[4].target - pSCA->Position_Real) > (mp[4].step / 2)) //
             {
                 motor_act(4, mp[4].step, mp[4].target - pSCA->Position_Real > 0 ? 0 : 1);
                 tim14_counter++;
@@ -345,7 +353,7 @@ void TIM8_TRG_COM_TIM14_IRQHandler(void)
             else
             {
                 TIM_Cmd(TIM14, DISABLE);
-							  setPosition(4, mp[4].target);
+                setPosition(4, mp[4].target);
             }
         }
     }

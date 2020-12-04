@@ -50,6 +50,9 @@ extern u8 cmd_counter;
 extern u8 cmd_flag;
 extern u8 cmd_shadow_buffer[100];
 extern volatile u16 cmd_len;
+extern volatile u8 update_next_pos_flag;
+extern u32 trace_point_counter;
+extern u32 trace_point_max;
 
 typedef struct loop_buffer
 {
@@ -81,6 +84,8 @@ typedef struct cmd_struct
 } CMD_STRUCT;
 
 extern CMD_STRUCT cmd_s;
+typedef u8 (*CMD_PARSER)(CMD_STRUCT input);
+extern CMD_PARSER cmd_act[20];
 
 //rotation matrix
 extern float r1_0[3][3];
@@ -105,6 +110,33 @@ typedef struct motor_parameter
 } MOTOR_PARAMETER;
 
 extern MOTOR_PARAMETER mp[5];
+
+typedef struct position_struct
+{
+    float x;
+    float y;
+    float z;
+} PT;
+
+extern PT current_position;
+
+typedef struct step_struct
+{
+    float sx;
+    float sy;
+    float sz;
+} STEP_STRUCT;
+
+extern volatile STEP_STRUCT step_value;
+
+typedef struct step_speed
+{
+    float spx;
+    float spy;
+    float spz;
+} STEP_SPEED_STRUCT;
+
+extern volatile STEP_SPEED_STRUCT step_speed_value;
 
 /**
  * @brief describe the system status, include location, speed, if_rotation
@@ -231,6 +263,34 @@ u32 CRC_Cal(u8 *data_buffer, u16 size);
  * 
  */
 void init_loop_buf(void);
-
+/**
+ * @brief pase cmd function
+ * 
+ * @param command 
+ * @return u8 
+ */
 u8 parse_cmd(CMD_STRUCT *command);
+
+u8 cmd1_p(CMD_STRUCT input);
+
+u8 cmd2_p(CMD_STRUCT input);
+
+u8 cmd3_p(CMD_STRUCT input);
+
+u8 cmd4_p(CMD_STRUCT input);
+
+u8 cmd5_p(CMD_STRUCT input);
+
+u8 cmd6_p(CMD_STRUCT input);
+
+u8 cmd7_p(CMD_STRUCT input);
+
+u8 cmd8_p(CMD_STRUCT input);
+
+u8 cmd9_p(CMD_STRUCT input);
+
+u8 cmd10_p(CMD_STRUCT input);
+
+u8 cmd11_p(CMD_STRUCT input);
+
 #endif

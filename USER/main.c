@@ -58,12 +58,72 @@ u16 frame_index = 0;
 float c39_x = 0;
 float c39_y = 0;
 float c39_z = 0;
-
+PT current_position;
 float pre_angle[5];
+CMD_PARSER cmd_act[20] = {NULL};
+u32 trace_point_counter = 0;
+u32 trace_point_max = 0;
+volatile STEP_STRUCT step_value;
+volatile u8 update_next_pos_flag = 0;
+volatile STEP_SPEED_STRUCT step_speed_value;
 /* Forward Declaration -----------------------------------------------------------*/
 static void Log(void);
 static void CMD_Handler(uint8_t cmd);
 
+u8 cmd1_p(CMD_STRUCT input)
+{
+	return 0;
+}
+
+u8 cmd2_p(CMD_STRUCT input)
+{
+	return 0;
+}
+
+u8 cmd3_p(CMD_STRUCT input)
+{
+	return 0;
+}
+
+u8 cmd4_p(CMD_STRUCT input)
+{
+	return 0;
+}
+
+u8 cmd5_p(CMD_STRUCT input)
+{
+	return 0;
+}
+
+u8 cmd6_p(CMD_STRUCT input)
+{
+	return 0;
+}
+
+u8 cmd7_p(CMD_STRUCT input)
+{
+	return 0;
+}
+
+u8 cmd8_p(CMD_STRUCT input)
+{
+	return 0;
+}
+
+u8 cmd9_p(CMD_STRUCT input)
+{
+	return 0;
+}
+
+u8 cmd10_p(CMD_STRUCT input)
+{
+	return 0;
+}
+
+u8 cmd11_p(CMD_STRUCT input)
+{
+	return 0;
+}
 void init_loop_buf(void)
 {
 	int k = 0;
@@ -219,6 +279,31 @@ void motor_parameter_init(void)
 
 	//init the cmd s
 	cmd_s.cmd_index = 0;
+
+	//init the function array
+	cmd_act[1] = cmd1_p;
+	cmd_act[2] = cmd2_p;
+	cmd_act[3] = cmd3_p;
+	cmd_act[4] = cmd4_p;
+	cmd_act[5] = cmd5_p;
+	cmd_act[6] = cmd6_p;
+	cmd_act[7] = cmd7_p;
+	cmd_act[8] = cmd8_p;
+	cmd_act[9] = cmd9_p;
+	cmd_act[10] = cmd10_p;
+	cmd_act[11] = cmd11_p;
+
+	//init step value
+	step_value.sx = 0.1;
+	step_value.sy = 0.1;
+	step_value.sz = 0.1;
+
+	//init step speed
+
+	step_speed_value.spx = 3;
+	step_speed_value.spy = 3;
+	step_speed_value.spz = 3;
+
 	return;
 }
 
@@ -232,7 +317,7 @@ char calculate_position_xyz(float t1, float t2, float t3, float t4, float *x, fl
 	float s23 = t2 + t3;
 	*x = L3 * cosf(A2R(t1)) * c23 - D3 * sinf(A2R(t1)) + L2 * cosf(A2R(t1)) * cosf(A2R(t2)) - L1 * sinf(A2R(t1));
 	*y = L3 * sinf(A2R(t1)) * c23 + D3 * cosf(A2R(t1)) + L2 * sinf(A2R(t1)) * cosf(A2R(t2)) + L1 * cosf(A2R(t1));
-	*z = -L3 * sin(A2R(s23)) - L2 * sin(t2 * Pi / 180.0);
+	*z = -L3 * sin(A2R(s23)) - L2 * sin(t2 * Pi / (double)(180.0));
 	return 0;
 }
 
@@ -313,6 +398,22 @@ char update_status(void)
 			{
 				return 20 + i;
 			}
+		}
+
+		//calculate position
+		float t1, t2, t3, t4;
+		char res = position_2_angle(&t1, &t2, &t3, &t4);
+		if (res != 0)
+		{
+			printf(" error while in processing position to angle\n");
+		}
+		else
+		{
+			t1 = __fabs(t1) < 0.01 ? 0 : t1;
+			t2 = __fabs(t2) < 0.01 ? 0 : t2;
+			t3 = __fabs(t3) < 0.01 ? 0 : t3;
+			t4 = __fabs(t4) < 0.01 ? 0 : t4;
+			calculate_position_xyz(t1, t2, t3, t4, &current_position.x, &current_position.y, &current_position.z);
 		}
 	}
 	return 0;
@@ -431,7 +532,7 @@ char calculate_inverse(float x4, float y4, float z4, float *t1, float *t2, float
 	else
 	{
 		float tmp_b = L1 + D3;
-		int a_dir = 0;
+		//int a_dir = 0;
 		float tmp_a = sqrtf(x4 * x4 + y4 * y4 - tmp_b * tmp_b);
 
 		float t1_array[5];
@@ -471,12 +572,12 @@ char calculate_inverse(float x4, float y4, float z4, float *t1, float *t2, float
 		}
 		if (index == 1 || index == 2)
 		{
-			a_dir = 1;
+			//a_dir = 1;
 			tmp_a = sqrtf(x4 * x4 + y4 * y4 - tmp_b * tmp_b);
 		}
 		else
 		{
-			a_dir = -1;
+			//a_dir = -1;
 			tmp_a = -sqrtf(x4 * x4 + y4 * y4 - tmp_b * tmp_b);
 		}
 		printf("theta 1       %f\n", _t1);
@@ -616,7 +717,7 @@ u8 parse_cmd(CMD_STRUCT *command)
 			while (loop_head->if_processed == 0)
 			{
 				delay_us(2);
-				if (loop_counter++ > 40)
+				if (loop_counter++ > 60)
 				{
 					loop_head->if_processed = 0;
 					loop_head = loop_head->next;
@@ -641,10 +742,56 @@ u8 parse_cmd(CMD_STRUCT *command)
 		cmd_s.data_length = len - 4;
 		cmd_s.cmd_index = ((u16)tmp_buffer[2] << 8) | ((u16)tmp_buffer[2]);
 		cmd_s.function_code = tmp_buffer[4];
-		if (cmd_s.function_code >= 1 && cmd_s.function_code <= 4)
+		if ((cmd_s.function_code >= 1 && cmd_s.function_code <= 4) || (cmd_s.function_code == 10) || (cmd_s.function_code == 11))
 		{
 			printf("control frame, function code  %d\n", cmd_s.function_code);
 			cmd_s.cmd_type = 3;
+			cmd_s.target_motor = 0;
+			switch (cmd_s.function_code)
+			{
+			case 10:
+			{
+				u8 *tmpdata = &tmp_buffer[5];
+				u8 tk = 0;
+				for (tk = 0; tk < cmd_s.data_length; tk++)
+				{
+					if (*tmpdata == 1)
+					{
+						cmd_s.target_motor |= (1 << tk);
+						if (tk + 1 <= 4)
+						{
+							enableActuator(tk + 1);
+							activateActuatorMode(tk + 1, SCA_Position_Mode, Block);
+						}
+					}
+					tmpdata++;
+				}
+				if (cmd_s.target_motor > 15)
+				{
+					printf("warning too much motor, enable 1 to 4 motor already\n");
+				}
+				break;
+			}
+			case 11:
+			{
+				u8 *tmpdata = &tmp_buffer[5];
+				u8 tk = 0;
+				cmd_s.target_motor = 0xFF;
+				for (tk = 0; tk < cmd_s.data_length; tk++)
+				{
+					if (*tmpdata == 0)
+					{
+						cmd_s.target_motor &= (0 << tk);
+						if (tk + 1 <= 4)
+						{
+							disableActuator(tk + 1);
+						}
+					}
+					tmpdata++;
+				}
+				break;
+			}
+			}
 		}
 		if (cmd_s.function_code >= 5 && cmd_s.function_code <= 8)
 		{
@@ -697,7 +844,7 @@ int main(void)
 	TIM_init(50 - 1, 9000 - 1, 4);
 	TIM_init(50 - 1, 9000 - 1, 13);
 	TIM_init(50 - 1, 9000 - 1, 14);
-	TIM_init(10 - 1, 9000 - 1, 6);
+	TIM_init(600 - 1, 9000 - 1, 6);
 
 	//TIM_Cmd(TIM6, ENABLE);
 
@@ -725,6 +872,82 @@ int main(void)
 			}
 		}
 		if_error = update_status();
+		if (update_next_pos_flag == 1)
+		{
+			update_next_pos_flag = 0;
+			float xn, yn, zn;
+			if (__fabs(current_position.x - cmd_s.px) < step_value.sx)
+			{
+				xn = current_position.x;
+			}
+			else
+			{
+				if (__fabs(current_position.x - cmd_s.px) > 10 * step_value.sx)
+				{
+					xn = current_position.x + (cmd_s.px - current_position.x) / __fabs(current_position.x - cmd_s.px) * step_speed_value.spx;
+				}
+				else
+				{
+					xn = current_position.x + (cmd_s.px - current_position.x) / __fabs(current_position.x - cmd_s.px) * 1;
+				}
+
+				if (__fabs(current_position.y - cmd_s.py) > 10 * step_value.sy)
+				{
+					yn = current_position.y + (cmd_s.py - current_position.y) / __fabs(current_position.y - cmd_s.py) * step_speed_value.spy;
+				}
+				else
+				{
+					yn = current_position.y + (cmd_s.py - current_position.y) / __fabs(current_position.y - cmd_s.py) * 1;
+				}
+
+				if (__fabs(current_position.z - cmd_s.pz) > 10 * step_value.sz)
+				{
+					zn = current_position.z + (cmd_s.pz - current_position.z) / __fabs(current_position.z - cmd_s.pz) * step_speed_value.spz;
+				}
+				else
+				{
+					zn = current_position.z + (cmd_s.pz - current_position.z) / __fabs(current_position.z - cmd_s.pz) * 1;
+				}
+
+				float t1, t2, t3, t4;
+				char res = position_2_angle(&t1, &t2, &t3, &t4);
+				if (res != 0)
+				{
+					printf(" error while in processing position to angle\n");
+				}
+				else
+				{
+					t1 = __fabs(t1) < 0.01 ? 0 : t1;
+					t2 = __fabs(t2) < 0.01 ? 0 : t2;
+					t3 = __fabs(t3) < 0.01 ? 0 : t3;
+					t4 = __fabs(t4) < 0.01 ? 0 : t4;
+					float sv1, sv2, sv3, sv4;
+					char res = calculate_inverse(xn, yn, zn, &sv1, &sv2, &sv3, &sv4);
+					if (res == 0)
+					{
+						//calculate the speed
+						float sp1 = __fabs(sv1 - t1) / 0.1;
+						float sp2 = __fabs(sv2 - t2) / 0.1;
+						float sp3 = __fabs(sv3 - t3) / 0.1;
+						float sp4 = __fabs(sv4 - t4) / 0.1;
+						sp1 = sp1 > 100 ? 100 : sp1;
+						sp2 = sp2 > 100 ? 100 : sp2;
+						sp3 = sp3 > 100 ? 100 : sp3;
+						sp4 = sp4 > 100 ? 100 : sp4;
+						sv1 = __fabs(sv1) < 0.1 ? 0 : sv1;
+						sv2 = __fabs(sv2) < 0.1 ? 0 : sv2;
+						sv3 = __fabs(sv3) < 0.1 ? 0 : sv3;
+						sv4 = __fabs(sv4) < 0.1 ? 0 : sv4;
+						angle_act_position(sv1, sv2, sv3, sv4, sp1, sp2, sp3, sp4);
+					}
+					else
+					{
+						printf("no inverse out of range\n");
+					}
+				}
+			}
+			update_next_pos_flag = 0;
+		}
 		if (if_need_lookup_monitor)
 		{
 			if (lookup_counter > 10)
@@ -1080,7 +1303,7 @@ static void CMD_Handler(uint8_t cmd)
 			t2 = __fabs(t2) < 0.01 ? 0 : t2;
 			t3 = __fabs(t3) < 0.01 ? 0 : t3;
 			t4 = __fabs(t4) < 0.01 ? 0 : t4;
-			calculate_position_xyz(t1, t2, t3, t4, &c39_x, &c39_y, &c39_z);
+			//calculate_position_xyz(t1, t2, t3, t4, &c39_x, &c39_y, &c39_z);
 			float sv1, sv2, sv3, sv4;
 			char res = calculate_inverse(c39_x + 5, c39_y, c39_z, &sv1, &sv2, &sv3, &sv4);
 			if (res == 0)
@@ -1125,7 +1348,7 @@ static void CMD_Handler(uint8_t cmd)
 			t2 = __fabs(t2) < 0.01 ? 0 : t2;
 			t3 = __fabs(t3) < 0.01 ? 0 : t3;
 			t4 = __fabs(t4) < 0.01 ? 0 : t4;
-			calculate_position_xyz(t1, t2, t3, t4, &c39_x, &c39_y, &c39_z);
+			//calculate_position_xyz(t1, t2, t3, t4, &c39_x, &c39_y, &c39_z);
 			float sv1, sv2, sv3, sv4;
 			char res = calculate_inverse(c39_x - 5, c39_y, c39_z, &sv1, &sv2, &sv3, &sv4);
 			if (res == 0)
