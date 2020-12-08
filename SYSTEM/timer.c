@@ -305,6 +305,7 @@ void TIM6_DAC_IRQHandler(void)
         {
             TIM_Cmd(TIM6, DISABLE);
             printf("cmd over\n");
+            return_completed();
         }
         else
         {

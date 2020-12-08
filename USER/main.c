@@ -14,6 +14,7 @@
 #include "main.h"
 #include <math.h>
 #include "timer.h"
+#include "usart.h"
 
 /* Variable defines --------------------------------------------------------------*/
 uint8_t cmd = 0;						  //Íâ²¿¿ØÖÆÃüÁî
@@ -650,6 +651,288 @@ char calculate_inverse(float x4, float y4, float z4, float *t1, float *t2, float
 	return 0;
 }
 
+void return_data(void)
+{
+	switch (cmd_s.function_code)
+	{
+	case 5:
+	{
+		u8 send_buffer[50] = {0};
+		send_buffer[0] = 0xFF;
+		send_buffer[1] = 0xFF;
+		send_buffer[2] = 0x00;
+		send_buffer[3] = 9 + (cmd_s.data_length - 5) * 5;
+		send_buffer[4] = (u8)(cmd_s.cmd_index >> 8);
+		send_buffer[5] = (u8)(cmd_s.cmd_index & 0xFF);
+		send_buffer[6] = 0x05;
+		u8 *tps = &send_buffer[7];
+		u8 ks = 0;
+		u8 tm = cmd_s.target_motor;
+		u8 mc = 0;
+		while (tm > 0)
+		{
+			if (tm & 0x01)
+			{
+				mc++;
+			}
+			tm >>= 1;
+		}
+		if (mc != cmd_s.data_length - 5)
+		{
+			//error
+			printf("error\n");
+			return;
+		}
+		mc = 0;
+		tm = cmd_s.target_motor;
+		float a[5];
+		position_2_angle(&a[1], &a[2], &a[3], &a[4]);
+		for (ks = 0; ks < cmd_s.data_length - 5; ks++)
+		{
+			while (tm > 0)
+			{
+				if (tm & 0x01)
+				{
+					mc++;
+					tm >>= 1;
+					break;
+				}
+				tm >>= 1;
+			}
+			*tps++ = mc;
+			*tps++ = (u8)((int32_t)(a[mc] * 10000) >> 24);
+			*tps++ = (u8)((int32_t)(a[mc] * 10000) >> 16);
+			*tps++ = (u8)((int32_t)(a[mc] * 10000) >> 8);
+			*tps++ = (u8)((int32_t)(a[mc] * 10000) & 0xFF);
+		}
+		u32 crc_res = CRC_Cal(&send_buffer[2], 5 + (cmd_s.data_length - 5) * 5);
+		*tps++ = (u8)((int32_t)crc_res >> 24);
+		*tps++ = (u8)((int32_t)crc_res >> 16);
+		*tps++ = (u8)((int32_t)crc_res >> 8);
+		*tps++ = (u8)((int32_t)crc_res & 0xFF);
+		USART1_SendStr(send_buffer, 11 + (cmd_s.data_length - 5) * 5);
+		break;
+	}
+	case 6:
+	{
+		u8 send_buffer[50] = {0};
+		send_buffer[0] = 0xFF;
+		send_buffer[1] = 0xFF;
+		send_buffer[2] = 0x00;
+		send_buffer[3] = 9 + (cmd_s.data_length - 5) * 5;
+		send_buffer[4] = (u8)(cmd_s.cmd_index >> 8);
+		send_buffer[5] = (u8)(cmd_s.cmd_index & 0xFF);
+		send_buffer[6] = 0x06;
+		u8 *tps = &send_buffer[7];
+		u8 ks = 0;
+		u8 tm = cmd_s.target_motor;
+		u8 mc = 0;
+		while (tm > 0)
+		{
+			if (tm & 0x01)
+			{
+				mc++;
+			}
+			tm >>= 1;
+		}
+		if (mc != cmd_s.data_length - 5)
+		{
+			//error
+			printf("error\n");
+			return;
+		}
+		mc = 0;
+		tm = cmd_s.target_motor;
+		float a[5];
+		u8 tkk = 0;
+		SCA_Handler_t *pSCA = NULL;
+		for (tkk = 1; tkk < 5; tkk++)
+		{
+			pSCA = getInstance(tkk);
+			if (pSCA != NULL)
+			{
+				a[tkk] = pSCA->Velocity_Real / 6;
+			}
+		}
+
+		for (ks = 0; ks < cmd_s.data_length - 5; ks++)
+		{
+			while (tm > 0)
+			{
+				if (tm & 0x01)
+				{
+					mc++;
+					tm >>= 1;
+					break;
+				}
+				tm >>= 1;
+			}
+			*tps++ = mc;
+			*tps++ = (u8)((int32_t)(a[mc] * 10000) >> 24);
+			*tps++ = (u8)((int32_t)(a[mc] * 10000) >> 16);
+			*tps++ = (u8)((int32_t)(a[mc] * 10000) >> 8);
+			*tps++ = (u8)((int32_t)(a[mc] * 10000) & 0xFF);
+		}
+		u32 crc_res = CRC_Cal(&send_buffer[2], 5 + (cmd_s.data_length - 5) * 5);
+		*tps++ = (u8)((int32_t)crc_res >> 24);
+		*tps++ = (u8)((int32_t)crc_res >> 16);
+		*tps++ = (u8)((int32_t)crc_res >> 8);
+		*tps++ = (u8)((int32_t)crc_res & 0xFF);
+		USART1_SendStr(send_buffer, 11 + (cmd_s.data_length - 5) * 5);
+		break;
+	}
+	case 7:
+	{
+		u8 send_buffer[50] = {0};
+		send_buffer[0] = 0xFF;
+		send_buffer[1] = 0xFF;
+		send_buffer[2] = 0x00;
+		send_buffer[3] = 0x21;
+		send_buffer[4] = (u8)(cmd_s.cmd_index >> 8);
+		send_buffer[5] = (u8)(cmd_s.cmd_index & 0xFF);
+		send_buffer[6] = 0x07;
+		u8 *tps = &send_buffer[7];
+		float a[5] = {0};
+		position_2_angle(&a[1], &a[2], &a[3], &a[4]);
+		//rotation
+		*tps++ = 0;
+		*tps++ = 0;
+		*tps++ = 0;
+		*tps++ = 0;
+
+		int32_t theta_y = (int32_t)((a[2] + a[3] + a[4]) * 10000);
+		*tps++ = (u8)((int32_t)(theta_y) >> 24);
+		*tps++ = (u8)((int32_t)(theta_y) >> 16);
+		*tps++ = (u8)((int32_t)(theta_y) >> 8);
+		*tps++ = (u8)((int32_t)(theta_y)&0xFF);
+
+		int32_t theta_z = (int32_t)(a[1] * 10000);
+
+		*tps++ = (u8)((int32_t)(theta_z) >> 24);
+		*tps++ = (u8)((int32_t)(theta_z) >> 16);
+		*tps++ = (u8)((int32_t)(theta_z) >> 8);
+		*tps++ = (u8)((int32_t)(theta_z)&0xFF);
+
+		//position
+		*tps++ = (u8)((int32_t)(current_position.x * 100) >> 24);
+		*tps++ = (u8)((int32_t)(current_position.x * 100) >> 16);
+		*tps++ = (u8)((int32_t)(current_position.x * 100) >> 8);
+		*tps++ = (u8)((int32_t)(current_position.x * 100) & 0xFF);
+
+		*tps++ = (u8)((int32_t)(current_position.y * 100) >> 24);
+		*tps++ = (u8)((int32_t)(current_position.y * 100) >> 16);
+		*tps++ = (u8)((int32_t)(current_position.y * 100) >> 8);
+		*tps++ = (u8)((int32_t)(current_position.y * 100) & 0xFF);
+
+		*tps++ = (u8)((int32_t)(current_position.z * 100) >> 24);
+		*tps++ = (u8)((int32_t)(current_position.z * 100) >> 16);
+		*tps++ = (u8)((int32_t)(current_position.z * 100) >> 8);
+		*tps++ = (u8)((int32_t)(current_position.z * 100) & 0xFF);
+
+		u32 crc_res = CRC_Cal(&send_buffer[2], 29);
+		*tps++ = (u8)((int32_t)crc_res >> 24);
+		*tps++ = (u8)((int32_t)crc_res >> 16);
+		*tps++ = (u8)((int32_t)crc_res >> 8);
+		*tps++ = (u8)((int32_t)crc_res & 0xFF);
+
+		USART1_SendStr(send_buffer, 35);
+		break;
+	}
+	case 8:
+	{
+		u8 send_buffer[50] = {0};
+		send_buffer[0] = 0xFF;
+		send_buffer[1] = 0xFF;
+		send_buffer[2] = 0x00;
+		send_buffer[3] = 9 + (cmd_s.data_length - 5) * 1;
+		send_buffer[4] = (u8)(cmd_s.cmd_index >> 8);
+		send_buffer[5] = (u8)(cmd_s.cmd_index & 0xFF);
+		send_buffer[6] = 0x08;
+		u8 *tps = &send_buffer[7];
+		u8 ks = 0;
+		u8 tm = cmd_s.target_motor;
+		u8 mc = 0;
+		while (tm > 0)
+		{
+			if (tm & 0x01)
+			{
+				mc++;
+			}
+			tm >>= 1;
+		}
+		if (mc != cmd_s.data_length - 5)
+		{
+			//error
+			printf("error\n");
+			return;
+		}
+		mc = 0;
+		tm = cmd_s.target_motor;
+		float a[5];
+		u8 tkk = 0;
+		SCA_Handler_t *pSCA = NULL;
+		for (tkk = 1; tkk < 5; tkk++)
+		{
+			pSCA = getInstance(tkk);
+			if (pSCA != NULL)
+			{
+				a[tkk] = pSCA->SCA_Warn.Error_Code;
+			}
+		}
+
+		for (ks = 0; ks < cmd_s.data_length - 5; ks++)
+		{
+			while (tm > 0)
+			{
+				if (tm & 0x01)
+				{
+					mc++;
+					tm >>= 1;
+					break;
+				}
+				tm >>= 1;
+			}
+			*tps++ = (u8)((int32_t)(a[mc]) & 0xFF);
+		}
+		u32 crc_res = CRC_Cal(&send_buffer[2], 5 + (cmd_s.data_length - 5) * 1);
+		*tps++ = (u8)((int32_t)crc_res >> 24);
+		*tps++ = (u8)((int32_t)crc_res >> 16);
+		*tps++ = (u8)((int32_t)crc_res >> 8);
+		*tps++ = (u8)((int32_t)crc_res & 0xFF);
+		USART1_SendStr(send_buffer, 11 + (cmd_s.data_length - 5) * 1);
+		break;
+	}
+	}
+	return;
+}
+
+void return_completed(void)
+{
+	u8 send_buffer[20] = {0};
+	send_buffer[0] = 0xFF;
+	send_buffer[1] = 0xFF;
+	send_buffer[2] = 0x00;
+	send_buffer[3] = 0x0B;
+	send_buffer[4] = (u8)(cmd_s.cmd_index >> 8);
+	send_buffer[5] = (u8)(cmd_s.cmd_index & 0xFF);
+	if (cmd_s.cmd_type == 3)
+	{
+		send_buffer[6] = 0;
+	}
+	else
+	{
+		send_buffer[6] = cmd_s.function_code;
+	}
+	send_buffer[7] = 0x01;
+	send_buffer[8] = 0x00;
+	u32 crc_res = CRC_Cal(&send_buffer[2], 7);
+	send_buffer[9] = (u8)((int32_t)crc_res >> 24);
+	send_buffer[10] = (u8)((int32_t)crc_res >> 16);
+	send_buffer[11] = (u8)((int32_t)crc_res >> 8);
+	send_buffer[12] = (u8)((int32_t)crc_res & 0xFF);
+	USART1_SendStr(send_buffer, 13);
+	return;
+}
 u8 parse_cmd(CMD_STRUCT *command)
 {
 	while (1)
@@ -742,7 +1025,8 @@ u8 parse_cmd(CMD_STRUCT *command)
 		cmd_s.data_length = len - 4;
 		cmd_s.cmd_index = ((u16)tmp_buffer[2] << 8) | ((u16)tmp_buffer[2]);
 		cmd_s.function_code = tmp_buffer[4];
-		if ((cmd_s.function_code >= 1 && cmd_s.function_code <= 4) || (cmd_s.function_code == 10) || (cmd_s.function_code == 11))
+		if ((cmd_s.function_code >= 1 && cmd_s.function_code <= 4) || (cmd_s.function_code == 10) ||
+			(cmd_s.function_code == 11) || (cmd_s.function_code == 12) || (cmd_s.function_code == 13))
 		{
 			printf("control frame, function code  %d\n", cmd_s.function_code);
 			cmd_s.cmd_type = 3;
@@ -753,7 +1037,7 @@ u8 parse_cmd(CMD_STRUCT *command)
 			{
 				u8 *tmpdata = &tmp_buffer[5];
 				u8 tk = 0;
-				for (tk = 0; tk < cmd_s.data_length; tk++)
+				for (tk = 0; tk < cmd_s.data_length - 5; tk++)
 				{
 					if (*tmpdata == 1)
 					{
@@ -777,7 +1061,7 @@ u8 parse_cmd(CMD_STRUCT *command)
 				u8 *tmpdata = &tmp_buffer[5];
 				u8 tk = 0;
 				cmd_s.target_motor = 0xFF;
-				for (tk = 0; tk < cmd_s.data_length; tk++)
+				for (tk = 0; tk < cmd_s.data_length - 5; tk++)
 				{
 					if (*tmpdata == 0)
 					{
@@ -789,6 +1073,52 @@ u8 parse_cmd(CMD_STRUCT *command)
 					}
 					tmpdata++;
 				}
+				break;
+			}
+			case 12:
+			{
+				u8 *tmpdata = &tmp_buffer[5];
+				u8 tk = 0;
+				cmd_s.target_motor = 0xFF;
+				for (tk = 0; tk < cmd_s.data_length - 5; tk++)
+				{
+					if (*tmpdata == 0)
+					{
+						cmd_s.target_motor &= (0 << tk);
+						if (tk + 1 <= 4)
+						{
+							setVelocity(tk + 1, 0);
+							activateActuatorMode(tk + 1, SCA_Profile_Position_Mode, Block);
+							TIM_Cmd(TIM6, DISABLE);
+							cmd_s.px = current_position.x;
+							cmd_s.py = current_position.y;
+							cmd_s.pz = current_position.z;
+						}
+					}
+					tmpdata++;
+				}
+				break;
+			}
+			case 13:
+			{
+				u8 tpid = tmp_buffer[5];
+				if (tpid > 4)
+				{
+					printf("motor id error\n");
+				}
+				else
+				{
+					printf("abs position, cmd13\n");
+					int32_t tpdata = 0;
+					tpdata = (((int32_t)tmp_buffer[6]) << 24) | (((int32_t)tmp_buffer[7]) << 16) | (((int32_t)tmp_buffer[8]) << 8) | (((int32_t)tmp_buffer[9]));
+					SCA_Handler_t *pSCA = NULL;
+					pSCA = getInstance(tpid);
+					if (pSCA != NULL)
+					{
+						setPosition(tpid, (float)tpdata / (float)10000.0 + pSCA->Position_Real);
+					}
+				}
+
 				break;
 			}
 			case 1:
@@ -811,6 +1141,18 @@ u8 parse_cmd(CMD_STRUCT *command)
 			case 2:
 			{
 				printf("cmd 2, speed cmd\n");
+				int32_t tpdata = 0;
+				tpdata = (((int32_t)tmp_buffer[6]) << 24) | (((int32_t)tmp_buffer[7]) << 16) | (((int32_t)tmp_buffer[8]) << 8) | (((int32_t)tmp_buffer[9]));
+				u8 tpid = tmp_buffer[5];
+				if (tpid >= 1 && tpid <= 4)
+				{
+					activateActuatorMode(tpid, SCA_Velocity_Mode, Block);
+					float spv = (float)tpdata / (float)10000.0;
+					if (__fabs(spv) < 10)
+					{
+						setVelocity(tpid, spv * 6);
+					}
+				}
 				break;
 			}
 			case 3:
@@ -915,7 +1257,17 @@ u8 parse_cmd(CMD_STRUCT *command)
 		if (cmd_s.function_code >= 5 && cmd_s.function_code <= 8)
 		{
 			printf("read frame, function code  %d\n", cmd_s.function_code);
+
+			u8 *tmpdata = &tmp_buffer[5];
+			u8 tk = 0;
+			cmd_s.target_motor = 0x00;
+			for (tk = 0; tk < cmd_s.data_length - 5; tk++)
+			{
+				cmd_s.target_motor |= (1 << (*tmpdata - 1));
+				tmpdata++;
+			}
 			cmd_s.cmd_type = 1;
+			return_data();
 		}
 		if (cmd_s.function_code == 9)
 		{
@@ -997,7 +1349,7 @@ int main(void)
 			float xn, yn, zn;
 			if (__fabs(current_position.x - cmd_s.px) > 10 * step_value.sx)
 			{
-				xn = current_position.x + (cmd_s.px - current_position.x) / __fabs(current_position.x - cmd_s.px) * 5;//__fabs(current_position.x - cmd_s.px) / 5.0;
+				xn = current_position.x + (cmd_s.px - current_position.x) / __fabs(current_position.x - cmd_s.px) * 5; //__fabs(current_position.x - cmd_s.px) / 5.0;
 			}
 			else
 			{
@@ -1013,7 +1365,7 @@ int main(void)
 
 			if (__fabs(current_position.y - cmd_s.py) > 10 * step_value.sy)
 			{
-				yn = current_position.y + (cmd_s.py - current_position.y) / __fabs(current_position.y - cmd_s.py) * 5;//__fabs(current_position.y - cmd_s.py) / 5.0;
+				yn = current_position.y + (cmd_s.py - current_position.y) / __fabs(current_position.y - cmd_s.py) * 5; //__fabs(current_position.y - cmd_s.py) / 5.0;
 			}
 			else
 			{
@@ -1029,7 +1381,7 @@ int main(void)
 
 			if (__fabs(current_position.z - cmd_s.pz) > 10 * step_value.sz)
 			{
-				zn = current_position.z + (cmd_s.pz - current_position.z) / __fabs(current_position.z - cmd_s.pz) * 5;//__fabs(current_position.z - cmd_s.pz) / 5.0;
+				zn = current_position.z + (cmd_s.pz - current_position.z) / __fabs(current_position.z - cmd_s.pz) * 5; //__fabs(current_position.z - cmd_s.pz) / 5.0;
 			}
 			else
 			{

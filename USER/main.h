@@ -293,4 +293,6 @@ u8 cmd10_p(CMD_STRUCT input);
 
 u8 cmd11_p(CMD_STRUCT input);
 
+void return_completed(void);
+
 #endif

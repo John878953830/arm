@@ -7,7 +7,7 @@
 void uart_init(uint32_t bound);
 char USART1_Read(void);
 void USART1_Send(char ch);
-
+void USART1_SendStr(uint8_t *pData, uint16_t Len);
 #endif
 
 
