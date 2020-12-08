@@ -304,6 +304,7 @@ void TIM6_DAC_IRQHandler(void)
         if (__fabs(current_position.x - cmd_s.px) < step_value.sx && __fabs(current_position.y - cmd_s.py) < step_value.sy && __fabs(current_position.z - cmd_s.pz) < step_value.sz)
         {
             TIM_Cmd(TIM6, DISABLE);
+            printf("cmd over\n");
         }
         else
         {

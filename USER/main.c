@@ -266,10 +266,10 @@ void motor_parameter_init(void)
 	porg_4_3[2][0] = D3;
 
 	//init offset
-	mp[1].zero_offset = 0.2937;
-	mp[2].zero_offset = 16.0557;
-	mp[3].zero_offset = 33.4606;
-	mp[4].zero_offset = -15.09;
+	mp[1].zero_offset = -0.3167;
+	mp[2].zero_offset = 15.8464;
+	mp[3].zero_offset = 33.8108;
+	mp[4].zero_offset = -2.2222;
 
 	//init angle dir
 	mp[1].angle_dir = -1;
@@ -553,7 +553,7 @@ char calculate_inverse(float x4, float y4, float z4, float *t1, float *t2, float
 		t1_tmp = asinf(t1_sin_value);
 		t1_array[3] = R2A(t1_tmp) > 180 ? t1_tmp - 360 : R2A(t1_tmp);
 		t1_array[4] = (180 - R2A(t1_tmp)) > 180 ? 180 - R2A(t1_tmp) - 360 : 180 - R2A(t1_tmp);
-		printf("tmp t1    %f      %f    %f    %f\n", t1_array[1], t1_array[2], t1_array[3], t1_array[4]);
+		//printf("tmp t1    %f      %f    %f    %f\n", t1_array[1], t1_array[2], t1_array[3], t1_array[4]);
 		//find the nearest one to t1a
 		char i = 1, index = 1;
 		float tmpt1_f = 370;
@@ -580,7 +580,7 @@ char calculate_inverse(float x4, float y4, float z4, float *t1, float *t2, float
 			//a_dir = -1;
 			tmp_a = -sqrtf(x4 * x4 + y4 * y4 - tmp_b * tmp_b);
 		}
-		printf("theta 1       %f\n", _t1);
+		//printf("theta 1       %f\n", _t1);
 		*t1 = _t1;
 
 		float t3_array[3];
@@ -591,11 +591,11 @@ char calculate_inverse(float x4, float y4, float z4, float *t1, float *t2, float
 		float _t3 = acosf((x4 * x4 + y4 * y4 + z4 * z4 - tmp_b * tmp_b - L2 * L2 - L3 * L3) / 2 / L2 / L3);
 		t3_array[1] = R2A(_t3);
 		t3_array[2] = 180 + R2A(_t3) > 180 ? -R2A(_t3) : 180 + R2A(_t3);
-		printf("theta 3   %f, %f\n", t3_array[1], t3_array[2]);
+		//printf("theta 3   %f, %f\n", t3_array[1], t3_array[2]);
 
 		//find the nearest
 		_t3 = __fabs(ct3 - t3_array[1]) < __fabs(ct3 - t3_array[2]) ? t3_array[1] : t3_array[2];
-		printf("theta 3       %f\n", _t3);
+		//printf("theta 3       %f\n", _t3);
 		*t3 = _t3;
 
 		float mod = sqrtf(L3 * L3 + L2 * L2 + 2 * L2 * L3 * cosf(A2R(_t3)));
@@ -613,7 +613,7 @@ char calculate_inverse(float x4, float y4, float z4, float *t1, float *t2, float
 		t2_array[3] = (-tmpt2 - tmpt2_0) > Pi ? (-tmpt2 - tmpt2_0) - 2 * Pi : (-tmpt2 - tmpt2_0);
 		t2_array[4] = (-tmpt2 + tmpt2_0) > Pi ? (-tmpt2 + tmpt2_0) - 2 * Pi : (-tmpt2 + tmpt2_0);
 
-		printf("t2 %f,   %f   %f   %f\n", R2A(t2_array[1]), R2A(t2_array[2]), R2A(t2_array[3]), R2A(t2_array[4]));
+		//printf("t2 %f,   %f   %f   %f\n", R2A(t2_array[1]), R2A(t2_array[2]), R2A(t2_array[3]), R2A(t2_array[4]));
 		//find the nearest
 		float tmp_t2f = 370;
 		for (i = 1; i < 5; i++)
@@ -625,7 +625,7 @@ char calculate_inverse(float x4, float y4, float z4, float *t1, float *t2, float
 			}
 		}
 
-		printf("t2 is   %f\n", R2A(t2_array[index]));
+		//printf("t2 is   %f\n", R2A(t2_array[index]));
 		*t2 = R2A(t2_array[index]);
 
 		//calculate theta 4
@@ -643,7 +643,7 @@ char calculate_inverse(float x4, float y4, float z4, float *t1, float *t2, float
 				tmp_t4f = __fabs(ct4 - t4_array[i]);
 			}
 		}
-		printf("t4 is   %f\n", t4_array[index]);
+		//printf("t4 is   %f\n", t4_array[index]);
 		*t4 = t4_array[index];
 	}
 
@@ -761,7 +761,7 @@ u8 parse_cmd(CMD_STRUCT *command)
 						if (tk + 1 <= 4)
 						{
 							enableActuator(tk + 1);
-							activateActuatorMode(tk + 1, SCA_Position_Mode, Block);
+							activateActuatorMode(tk + 1, SCA_Profile_Position_Mode, Block);
 						}
 					}
 					tmpdata++;
@@ -789,6 +789,125 @@ u8 parse_cmd(CMD_STRUCT *command)
 					}
 					tmpdata++;
 				}
+				break;
+			}
+			case 1:
+			{
+				u8 tpid = tmp_buffer[5];
+				if (tpid > 4)
+				{
+					printf("motor id error\n");
+				}
+				else
+				{
+					printf("abs position, cmd1\n");
+					int32_t tpdata = 0;
+					tpdata = (((int32_t)tmp_buffer[6]) << 24) | (((int32_t)tmp_buffer[7]) << 16) | (((int32_t)tmp_buffer[8]) << 8) | (((int32_t)tmp_buffer[9]));
+					setPosition(tpid, (float)tpdata / (float)10000.0);
+				}
+
+				break;
+			}
+			case 2:
+			{
+				printf("cmd 2, speed cmd\n");
+				break;
+			}
+			case 3:
+			{
+				printf("cmd 3, relative position cmd\n");
+				int32_t tpdata = (((int32_t)tmp_buffer[6]) << 24) | (((int32_t)tmp_buffer[7]) << 16) | (((int32_t)tmp_buffer[8]) << 8) | (((int32_t)tmp_buffer[9]));
+				float tppos = (float)tpdata / (float)100.0;
+				u8 cmddir = tmp_buffer[5];
+				switch (cmddir)
+				{
+				case 0:
+				{
+					TIM_Cmd(TIM6, DISABLE);
+					cmd_s.px = current_position.x;
+					cmd_s.py = current_position.y + __fabs(tppos);
+					cmd_s.pz = current_position.z;
+					printf("target position is %f, %f, %f\n", cmd_s.px, cmd_s.py, cmd_s.pz);
+					TIM_Cmd(TIM6, ENABLE);
+					break;
+				}
+				case 1:
+				{
+					TIM_Cmd(TIM6, DISABLE);
+					cmd_s.px = current_position.x;
+					cmd_s.py = current_position.y - __fabs(tppos);
+					cmd_s.pz = current_position.z;
+					printf("target position is %f, %f, %f\n", cmd_s.px, cmd_s.py, cmd_s.pz);
+					TIM_Cmd(TIM6, ENABLE);
+					break;
+				}
+				case 2:
+				{
+					TIM_Cmd(TIM6, DISABLE);
+					cmd_s.px = current_position.x - __fabs(tppos);
+					cmd_s.py = current_position.y;
+					cmd_s.pz = current_position.z;
+					printf("target position is %f, %f, %f\n", cmd_s.px, cmd_s.py, cmd_s.pz);
+					TIM_Cmd(TIM6, ENABLE);
+					break;
+				}
+				case 3:
+				{
+					TIM_Cmd(TIM6, DISABLE);
+					cmd_s.px = current_position.x + __fabs(tppos);
+					cmd_s.py = current_position.y;
+					cmd_s.pz = current_position.z;
+					printf("target position is %f, %f, %f\n", cmd_s.px, cmd_s.py, cmd_s.pz);
+					TIM_Cmd(TIM6, ENABLE);
+					break;
+				}
+				case 4:
+				{
+					TIM_Cmd(TIM6, DISABLE);
+					cmd_s.px = current_position.x;
+					cmd_s.py = current_position.y;
+					cmd_s.pz = current_position.z + __fabs(tppos);
+					printf("target position is %f, %f, %f\n", cmd_s.px, cmd_s.py, cmd_s.pz);
+					TIM_Cmd(TIM6, ENABLE);
+					break;
+				}
+				case 5:
+				{
+					TIM_Cmd(TIM6, DISABLE);
+					cmd_s.px = current_position.x;
+					cmd_s.py = current_position.y;
+					cmd_s.pz = current_position.z - __fabs(tppos);
+					printf("target position is %f, %f, %f\n", cmd_s.px, cmd_s.py, cmd_s.pz);
+					TIM_Cmd(TIM6, ENABLE);
+					break;
+				}
+				}
+				break;
+			}
+			case 4:
+			{
+				printf("cmd4, abs position cmd\n");
+				TIM_Cmd(TIM6, DISABLE);
+				int32_t tprx = (((int32_t)tmp_buffer[5]) << 24) | (((int32_t)tmp_buffer[6]) << 16) | (((int32_t)tmp_buffer[7]) << 8) | (((int32_t)tmp_buffer[8]));
+				int32_t tpry = (((int32_t)tmp_buffer[9]) << 24) | (((int32_t)tmp_buffer[10]) << 16) | (((int32_t)tmp_buffer[11]) << 8) | (((int32_t)tmp_buffer[12]));
+				int32_t tprz = (((int32_t)tmp_buffer[13]) << 24) | (((int32_t)tmp_buffer[14]) << 16) | (((int32_t)tmp_buffer[15]) << 8) | (((int32_t)tmp_buffer[16]));
+				int32_t tppx = (((int32_t)tmp_buffer[17]) << 24) | (((int32_t)tmp_buffer[18]) << 16) | (((int32_t)tmp_buffer[19]) << 8) | (((int32_t)tmp_buffer[20]));
+				int32_t tppy = (((int32_t)tmp_buffer[21]) << 24) | (((int32_t)tmp_buffer[22]) << 16) | (((int32_t)tmp_buffer[23]) << 8) | (((int32_t)tmp_buffer[24]));
+				int32_t tppz = (((int32_t)tmp_buffer[25]) << 24) | (((int32_t)tmp_buffer[26]) << 16) | (((int32_t)tmp_buffer[27]) << 8) | (((int32_t)tmp_buffer[28]));
+				float frx = (float)tprx / 10000;
+				float fry = (float)tpry / 10000;
+				float frz = (float)tprz / 10000;
+				float fpx = (float)tppx / 100;
+				float fpy = (float)tppy / 100;
+				float fpz = (float)tppz / 100;
+				cmd_s.px = fpx;
+				cmd_s.py = fpy;
+				cmd_s.pz = fpz;
+				cmd_s.rx = frx;
+				cmd_s.ry = fry;
+				cmd_s.rz = frz;
+				printf("%f, %f, %f, %f, %f, %f\n", frx, fry, frz, fpx, fpy, fpz);
+				TIM_Cmd(TIM6, ENABLE);
 				break;
 			}
 			}
@@ -876,76 +995,91 @@ int main(void)
 		{
 			update_next_pos_flag = 0;
 			float xn, yn, zn;
-			if (__fabs(current_position.x - cmd_s.px) < step_value.sx)
+			if (__fabs(current_position.x - cmd_s.px) > 10 * step_value.sx)
 			{
-				xn = current_position.x;
+				xn = current_position.x + (cmd_s.px - current_position.x) / __fabs(current_position.x - cmd_s.px) * 5;//__fabs(current_position.x - cmd_s.px) / 5.0;
 			}
 			else
 			{
-				if (__fabs(current_position.x - cmd_s.px) > 10 * step_value.sx)
+				if (__fabs(current_position.x - cmd_s.px) < step_value.sx)
 				{
-					xn = current_position.x + (cmd_s.px - current_position.x) / __fabs(current_position.x - cmd_s.px) * step_speed_value.spx;
+					xn = current_position.x;
 				}
 				else
 				{
-					xn = current_position.x + (cmd_s.px - current_position.x) / __fabs(current_position.x - cmd_s.px) * 1;
-				}
-
-				if (__fabs(current_position.y - cmd_s.py) > 10 * step_value.sy)
-				{
-					yn = current_position.y + (cmd_s.py - current_position.y) / __fabs(current_position.y - cmd_s.py) * step_speed_value.spy;
-				}
-				else
-				{
-					yn = current_position.y + (cmd_s.py - current_position.y) / __fabs(current_position.y - cmd_s.py) * 1;
-				}
-
-				if (__fabs(current_position.z - cmd_s.pz) > 10 * step_value.sz)
-				{
-					zn = current_position.z + (cmd_s.pz - current_position.z) / __fabs(current_position.z - cmd_s.pz) * step_speed_value.spz;
-				}
-				else
-				{
-					zn = current_position.z + (cmd_s.pz - current_position.z) / __fabs(current_position.z - cmd_s.pz) * 1;
-				}
-
-				float t1, t2, t3, t4;
-				char res = position_2_angle(&t1, &t2, &t3, &t4);
-				if (res != 0)
-				{
-					printf(" error while in processing position to angle\n");
-				}
-				else
-				{
-					t1 = __fabs(t1) < 0.01 ? 0 : t1;
-					t2 = __fabs(t2) < 0.01 ? 0 : t2;
-					t3 = __fabs(t3) < 0.01 ? 0 : t3;
-					t4 = __fabs(t4) < 0.01 ? 0 : t4;
-					float sv1, sv2, sv3, sv4;
-					char res = calculate_inverse(xn, yn, zn, &sv1, &sv2, &sv3, &sv4);
-					if (res == 0)
-					{
-						//calculate the speed
-						float sp1 = __fabs(sv1 - t1) / 0.1;
-						float sp2 = __fabs(sv2 - t2) / 0.1;
-						float sp3 = __fabs(sv3 - t3) / 0.1;
-						float sp4 = __fabs(sv4 - t4) / 0.1;
-						sp1 = sp1 > 100 ? 100 : sp1;
-						sp2 = sp2 > 100 ? 100 : sp2;
-						sp3 = sp3 > 100 ? 100 : sp3;
-						sp4 = sp4 > 100 ? 100 : sp4;
-						sv1 = __fabs(sv1) < 0.1 ? 0 : sv1;
-						sv2 = __fabs(sv2) < 0.1 ? 0 : sv2;
-						sv3 = __fabs(sv3) < 0.1 ? 0 : sv3;
-						sv4 = __fabs(sv4) < 0.1 ? 0 : sv4;
-						angle_act_position(sv1, sv2, sv3, sv4, sp1, sp2, sp3, sp4);
-					}
-					else
-					{
-						printf("no inverse out of range\n");
-					}
+					xn = current_position.x + (cmd_s.px - current_position.x) / __fabs(current_position.x - cmd_s.px) * step_value.sx / 2.0;
 				}
 			}
+
+			if (__fabs(current_position.y - cmd_s.py) > 10 * step_value.sy)
+			{
+				yn = current_position.y + (cmd_s.py - current_position.y) / __fabs(current_position.y - cmd_s.py) * 5;//__fabs(current_position.y - cmd_s.py) / 5.0;
+			}
+			else
+			{
+				if (__fabs(current_position.y - cmd_s.py) < step_value.sy)
+				{
+					yn = current_position.y;
+				}
+				else
+				{
+					yn = current_position.y + (cmd_s.py - current_position.y) / __fabs(current_position.y - cmd_s.py) * step_value.sy / 2.0;
+				}
+			}
+
+			if (__fabs(current_position.z - cmd_s.pz) > 10 * step_value.sz)
+			{
+				zn = current_position.z + (cmd_s.pz - current_position.z) / __fabs(current_position.z - cmd_s.pz) * 5;//__fabs(current_position.z - cmd_s.pz) / 5.0;
+			}
+			else
+			{
+				if (__fabs(current_position.z - cmd_s.pz) < step_value.sz)
+				{
+					zn = current_position.z;
+				}
+				else
+				{
+					zn = current_position.z + (cmd_s.pz - current_position.z) / __fabs(current_position.z - cmd_s.pz) * step_value.sz / 2.0;
+				}
+			}
+
+			float t1, t2, t3, t4;
+			char res = position_2_angle(&t1, &t2, &t3, &t4);
+			if (res != 0)
+			{
+				printf(" error while in processing position to angle\n");
+			}
+			else
+			{
+				t1 = __fabs(t1) < 0.01 ? 0 : t1;
+				t2 = __fabs(t2) < 0.01 ? 0 : t2;
+				t3 = __fabs(t3) < 0.01 ? 0 : t3;
+				t4 = __fabs(t4) < 0.01 ? 0 : t4;
+				float sv1, sv2, sv3, sv4;
+				char res = calculate_inverse(xn, yn, zn, &sv1, &sv2, &sv3, &sv4);
+				if (res == 0)
+				{
+					//calculate the speed
+					float sp1 = __fabs(sv1 - t1) / 0.1;
+					float sp2 = __fabs(sv2 - t2) / 0.1;
+					float sp3 = __fabs(sv3 - t3) / 0.1;
+					float sp4 = __fabs(sv4 - t4) / 0.1;
+					sp1 = sp1 > 100 ? 100 : sp1;
+					sp2 = sp2 > 100 ? 100 : sp2;
+					sp3 = sp3 > 100 ? 100 : sp3;
+					sp4 = sp4 > 100 ? 100 : sp4;
+					sv1 = __fabs(sv1) < 0.1 ? 0 : sv1;
+					sv2 = __fabs(sv2) < 0.1 ? 0 : sv2;
+					sv3 = __fabs(sv3) < 0.1 ? 0 : sv3;
+					sv4 = __fabs(sv4) < 0.1 ? 0 : sv4;
+					angle_act_position(sv1, sv2, sv3, sv4, sp1, sp2, sp3, sp4);
+				}
+				else
+				{
+					printf("no inverse out of range\n");
+				}
+			}
+
 			update_next_pos_flag = 0;
 		}
 		if (if_need_lookup_monitor)
