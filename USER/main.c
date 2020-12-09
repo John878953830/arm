@@ -400,6 +400,24 @@ char update_status(void)
 				return 20 + i;
 			}
 		}
+		//check if complete single position cmd
+		u8 kk = 1;
+		for (kk = 1; kk < 5; kk++)
+		{
+			if (cmd_s.motor_id[kk] == 1)
+			{
+				SCA_Handler_t *pSCA = NULL;
+				pSCA = getInstance(kk);
+				if (pSCA != NULL)
+				{
+					if (__fabs(pSCA->Position_Real - cmd_s.sigle_target_pos[kk]) < 0.05)
+					{
+						cmd_s.motor_id[kk] = 0;
+						return_completed();
+					}
+				}
+			}
+		}
 
 		//calculate position
 		float t1, t2, t3, t4;
@@ -697,6 +715,7 @@ void return_data(void)
 					tm >>= 1;
 					break;
 				}
+				mc++;
 				tm >>= 1;
 			}
 			*tps++ = mc;
@@ -765,6 +784,7 @@ void return_data(void)
 					tm >>= 1;
 					break;
 				}
+				mc++;
 				tm >>= 1;
 			}
 			*tps++ = mc;
@@ -890,6 +910,7 @@ void return_data(void)
 					tm >>= 1;
 					break;
 				}
+				mc++;
 				tm >>= 1;
 			}
 			*tps++ = (u8)((int32_t)(a[mc]) & 0xFF);
@@ -900,6 +921,35 @@ void return_data(void)
 		*tps++ = (u8)((int32_t)crc_res >> 8);
 		*tps++ = (u8)((int32_t)crc_res & 0xFF);
 		USART1_SendStr(send_buffer, 11 + (cmd_s.data_length - 5) * 1);
+		break;
+	}
+	}
+	return;
+}
+
+void return_ack(u8 cmdtype)
+{
+	switch (cmdtype)
+	{
+	case 3:
+	{
+		u8 sendbuffer[14] = {0};
+		sendbuffer[0] = 0xFF;
+		sendbuffer[1] = 0xFF;
+		sendbuffer[2] = 0x00;
+		sendbuffer[3] = 0x0B;
+		sendbuffer[4] = (u8)(cmd_s.cmd_index >> 8);
+		sendbuffer[5] = (u8)(cmd_s.cmd_index & 0xFF);
+		sendbuffer[6] = 0x00;
+		sendbuffer[7] = 0x00;
+		sendbuffer[8] = 0x00;
+		u32 crc_res = CRC_Cal(&sendbuffer[2], 7);
+		sendbuffer[9] = (u8)((int32_t)crc_res >> 24);
+		sendbuffer[10] = (u8)((int32_t)crc_res >> 16);
+		sendbuffer[11] = (u8)((int32_t)crc_res >> 8);
+		sendbuffer[12] = (u8)((int32_t)crc_res & 0xFF);
+		USART1_SendStr(sendbuffer, 13);
+		cmd_s.cmd_if_finished = 1;
 		break;
 	}
 	}
@@ -931,6 +981,35 @@ void return_completed(void)
 	send_buffer[11] = (u8)((int32_t)crc_res >> 8);
 	send_buffer[12] = (u8)((int32_t)crc_res & 0xFF);
 	USART1_SendStr(send_buffer, 13);
+	cmd_s.cmd_if_finished = 0;
+	return;
+}
+void return_failed(void)
+{
+	u8 send_buffer[20] = {0};
+	send_buffer[0] = 0xFF;
+	send_buffer[1] = 0xFF;
+	send_buffer[2] = 0x00;
+	send_buffer[3] = 0x0B;
+	send_buffer[4] = (u8)(cmd_s.cmd_index >> 8);
+	send_buffer[5] = (u8)(cmd_s.cmd_index & 0xFF);
+	if (cmd_s.cmd_type == 3)
+	{
+		send_buffer[6] = 0;
+	}
+	else
+	{
+		send_buffer[6] = cmd_s.function_code;
+	}
+	send_buffer[7] = 0x01;
+	send_buffer[8] = 0x01;
+	u32 crc_res = CRC_Cal(&send_buffer[2], 7);
+	send_buffer[9] = (u8)((int32_t)crc_res >> 24);
+	send_buffer[10] = (u8)((int32_t)crc_res >> 16);
+	send_buffer[11] = (u8)((int32_t)crc_res >> 8);
+	send_buffer[12] = (u8)((int32_t)crc_res & 0xFF);
+	USART1_SendStr(send_buffer, 13);
+	cmd_s.cmd_if_finished = 0;
 	return;
 }
 u8 parse_cmd(CMD_STRUCT *command)
@@ -1054,6 +1133,7 @@ u8 parse_cmd(CMD_STRUCT *command)
 				{
 					printf("warning too much motor, enable 1 to 4 motor already\n");
 				}
+				return_completed();
 				break;
 			}
 			case 11:
@@ -1073,6 +1153,7 @@ u8 parse_cmd(CMD_STRUCT *command)
 					}
 					tmpdata++;
 				}
+				return_completed();
 				break;
 			}
 			case 12:
@@ -1097,6 +1178,7 @@ u8 parse_cmd(CMD_STRUCT *command)
 					}
 					tmpdata++;
 				}
+				return_completed();
 				break;
 			}
 			case 13:
@@ -1108,17 +1190,25 @@ u8 parse_cmd(CMD_STRUCT *command)
 				}
 				else
 				{
-					printf("abs position, cmd13\n");
+					printf("rel position, cmd13\n");
 					int32_t tpdata = 0;
 					tpdata = (((int32_t)tmp_buffer[6]) << 24) | (((int32_t)tmp_buffer[7]) << 16) | (((int32_t)tmp_buffer[8]) << 8) | (((int32_t)tmp_buffer[9]));
 					SCA_Handler_t *pSCA = NULL;
 					pSCA = getInstance(tpid);
 					if (pSCA != NULL)
 					{
-						setPosition(tpid, (float)tpdata / (float)10000.0 + pSCA->Position_Real);
+						cmd_s.motor_id[tpid] = 1;
+						cmd_s.sigle_target_pos[tpid] = (float)tpdata / (float)10000.0 + pSCA->Position_Real;
+						if (setPosition(tpid, (float)tpdata / (float)10000.0 + pSCA->Position_Real) != 0)
+						{
+							cmd_s.motor_id[tpid] = 0;
+						}
+						else
+						{
+							return_ack(cmd_s.cmd_type);
+						}
 					}
 				}
-
 				break;
 			}
 			case 1:
@@ -1133,7 +1223,21 @@ u8 parse_cmd(CMD_STRUCT *command)
 					printf("abs position, cmd1\n");
 					int32_t tpdata = 0;
 					tpdata = (((int32_t)tmp_buffer[6]) << 24) | (((int32_t)tmp_buffer[7]) << 16) | (((int32_t)tmp_buffer[8]) << 8) | (((int32_t)tmp_buffer[9]));
-					setPosition(tpid, (float)tpdata / (float)10000.0);
+					SCA_Handler_t *pSCA = NULL;
+					pSCA = getInstance(tpid);
+					if (pSCA != NULL)
+					{
+						cmd_s.motor_id[tpid] = 1;
+						cmd_s.sigle_target_pos[tpid] = (float)tpdata / (float)10000.0;
+						if (setPosition(tpid, (float)tpdata / (float)10000.0) != 0)
+						{
+							cmd_s.motor_id[tpid] = 0;
+						}
+						else
+						{
+							return_ack(cmd_s.cmd_type);
+						}
+					}
 				}
 
 				break;
@@ -1150,7 +1254,11 @@ u8 parse_cmd(CMD_STRUCT *command)
 					float spv = (float)tpdata / (float)10000.0;
 					if (__fabs(spv) < 10)
 					{
-						setVelocity(tpid, spv * 6);
+						if (setVelocity(tpid, spv * 6) == 0)
+						{
+							return_ack(cmd_s.cmd_type);
+							return_completed();
+						}
 					}
 				}
 				break;
@@ -1224,6 +1332,7 @@ u8 parse_cmd(CMD_STRUCT *command)
 					break;
 				}
 				}
+				return_ack(cmd_s.cmd_type);
 				break;
 			}
 			case 4:
@@ -1250,6 +1359,7 @@ u8 parse_cmd(CMD_STRUCT *command)
 				cmd_s.rz = frz;
 				printf("%f, %f, %f, %f, %f, %f\n", frx, fry, frz, fpx, fpy, fpz);
 				TIM_Cmd(TIM6, ENABLE);
+				return_ack(cmd_s.cmd_type);
 				break;
 			}
 			}
@@ -1278,6 +1388,17 @@ u8 parse_cmd(CMD_STRUCT *command)
 		{
 			printf("heartbeat frame, function code  %d\n", cmd_s.function_code);
 			cmd_s.cmd_type = 0;
+			u8 heartbeat[9] = {0};
+			heartbeat[0] = 0xFF;
+			heartbeat[1] = 0xFF;
+			heartbeat[2] = 0x00;
+			heartbeat[3] = 0x06;
+			u32 crc_res = CRC_Cal(&heartbeat[2], 2);
+			heartbeat[4] = (u8)((int32_t)crc_res >> 24);
+			heartbeat[5] = (u8)((int32_t)crc_res >> 16);
+			heartbeat[6] = (u8)((int32_t)crc_res >> 8);
+			heartbeat[7] = (u8)((int32_t)crc_res & 0xFF);
+			USART1_SendStr(heartbeat, 13);
 		}
 
 		return 0;
@@ -1359,7 +1480,7 @@ int main(void)
 				}
 				else
 				{
-					xn = current_position.x + (cmd_s.px - current_position.x) / __fabs(current_position.x - cmd_s.px) * step_value.sx / 2.0;
+					xn = current_position.x + (cmd_s.px - current_position.x) / 2; // / __fabs(current_position.x - cmd_s.px) * step_value.sx / 2.0;
 				}
 			}
 
@@ -1375,7 +1496,7 @@ int main(void)
 				}
 				else
 				{
-					yn = current_position.y + (cmd_s.py - current_position.y) / __fabs(current_position.y - cmd_s.py) * step_value.sy / 2.0;
+					yn = current_position.y + (cmd_s.py - current_position.y) / 2; // / __fabs(current_position.y - cmd_s.py) * step_value.sy / 2.0;
 				}
 			}
 
@@ -1391,7 +1512,7 @@ int main(void)
 				}
 				else
 				{
-					zn = current_position.z + (cmd_s.pz - current_position.z) / __fabs(current_position.z - cmd_s.pz) * step_value.sz / 2.0;
+					zn = current_position.z + (cmd_s.pz - current_position.z) / 2; //__fabs(current_position.z - cmd_s.pz) * step_value.sz / 2.0;
 				}
 			}
 
@@ -1399,6 +1520,10 @@ int main(void)
 			char res = position_2_angle(&t1, &t2, &t3, &t4);
 			if (res != 0)
 			{
+				if (cmd_s.cmd_if_finished == 1)
+				{
+					return_failed();
+				}
 				printf(" error while in processing position to angle\n");
 			}
 			else
@@ -1428,6 +1553,11 @@ int main(void)
 				}
 				else
 				{
+					TIM_Cmd(TIM6, DISABLE);
+					if (cmd_s.cmd_if_finished == 1)
+					{
+						return_failed();
+					}
 					printf("no inverse out of range\n");
 				}
 			}
@@ -1815,6 +1945,10 @@ static void CMD_Handler(uint8_t cmd)
 			}
 			else
 			{
+				if (cmd_s.cmd_if_finished == 1)
+				{
+					return_failed();
+				}
 				printf("no inverse out of range\n");
 			}
 		}

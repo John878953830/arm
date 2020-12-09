@@ -268,6 +268,7 @@ void TIM3_IRQHandler(void)
             {
                 TIM_Cmd(TIM3, DISABLE);
                 setPosition(1, mp[1].target);
+                //return_completed();
             }
         }
     }
@@ -291,6 +292,7 @@ void TIM4_IRQHandler(void)
             {
                 TIM_Cmd(TIM4, DISABLE);
                 setPosition(2, mp[2].target);
+                //return_completed();
             }
         }
     }
@@ -333,6 +335,7 @@ void TIM8_UP_TIM13_IRQHandler(void)
             {
                 TIM_Cmd(TIM13, DISABLE);
                 setPosition(3, mp[3].target);
+                //return_completed();
             }
         }
     }
@@ -356,6 +359,7 @@ void TIM8_TRG_COM_TIM14_IRQHandler(void)
             {
                 TIM_Cmd(TIM14, DISABLE);
                 setPosition(4, mp[4].target);
+                //return_completed();
             }
         }
     }

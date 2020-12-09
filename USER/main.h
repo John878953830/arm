@@ -66,8 +66,11 @@ extern LOOP_BUFFER *loop_head;
 extern LOOP_BUFFER *loop_tail;
 typedef struct cmd_struct
 {
-    u8 cmd_if_correct; //0: correct 1: error
-    u16 cmd_type;      //0: heart beat  1: read 2: set 3: control
+    u8 cmd_if_correct;  //0: correct 1: error
+    u8 cmd_if_finished; //0:finished 1:unfinished
+    u8 motor_id[5];     //for single cmd to single motor, 1:unfinished ,check position
+    float sigle_target_pos[5];
+    u16 cmd_type; //0: heart beat  1: read 2: set 3: control
     u16 data_length;
     u16 cmd_lenght;
     u16 cmd_index;
@@ -294,5 +297,7 @@ u8 cmd10_p(CMD_STRUCT input);
 u8 cmd11_p(CMD_STRUCT input);
 
 void return_completed(void);
+
+void return_ack(u8 cmdtype);
 
 #endif
