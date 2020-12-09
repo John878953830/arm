@@ -3,7 +3,7 @@
 <title>Static Call Graph - [.\Object\SCA_Controller.axf]</title></head>
 <body><HR>
 <H1>Static Call Graph for image .\Object\SCA_Controller.axf</H1><HR>
-<BR><P>#&#060CALLGRAPH&#062# ARM Linker, 5060422: Last Updated: Wed Dec 09 18:13:36 2020
+<BR><P>#&#060CALLGRAPH&#062# ARM Linker, 5060422: Last Updated: Wed Dec 09 19:05:18 2020
 <BR><P>
 <H3>Maximum Stack Usage =        768 bytes + Unknown(Functions without stacksize, Cycles, Untraceable Function Pointers)</H3><H3>
 Call chain for Maximum Stack Depth:</H3>
@@ -435,6 +435,7 @@ Global Symbols
 <BR>[Calls]<UL><LI><a href="#[a7]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;getInstance
 </UL>
 <BR>[Called By]<UL><LI><a href="#[85]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;main
+<LI><a href="#[bd]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;parse_cmd
 <LI><a href="#[ba]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;return_data
 <LI><a href="#[b5]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;calculate_inverse
 <LI><a href="#[ad]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;update_status
@@ -489,7 +490,7 @@ Global Symbols
 <LI><a href="#[c5]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;CMD_Handler
 </UL>
 
-<P><STRONG><a name="[b5]"></a>calculate_inverse</STRONG> (Thumb, 2182 bytes, Stack size 208 bytes, main.o(.text))
+<P><STRONG><a name="[b5]"></a>calculate_inverse</STRONG> (Thumb, 2208 bytes, Stack size 208 bytes, main.o(.text))
 <BR><BR>[Stack]<UL><LI>Max Depth = 336 + Unknown Stack Size
 <LI>Call Chain = calculate_inverse &rArr; __2printf &rArr; _printf_char_file &rArr; _printf_char_common &rArr; __printf
 </UL>
@@ -542,8 +543,8 @@ Global Symbols
 <LI><a href="#[c5]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;CMD_Handler
 </UL>
 
-<P><STRONG><a name="[bd]"></a>parse_cmd</STRONG> (Thumb, 4026 bytes, Stack size 256 bytes, main.o(.text))
-<BR><BR>[Stack]<UL><LI>Max Depth = 496 + Unknown Stack Size
+<P><STRONG><a name="[bd]"></a>parse_cmd</STRONG> (Thumb, 4110 bytes, Stack size 272 bytes, main.o(.text))
+<BR><BR>[Stack]<UL><LI>Max Depth = 512 + Unknown Stack Size
 <LI>Call Chain = parse_cmd &rArr; return_data &rArr; CRC_Cal
 </UL>
 <BR>[Calls]<UL><LI><a href="#[c2]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;setVelocity
@@ -558,6 +559,7 @@ Global Symbols
 <LI><a href="#[bb]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;return_ack
 <LI><a href="#[ba]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;return_data
 <LI><a href="#[aa]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;return_completed
+<LI><a href="#[a9]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;position_2_angle
 <LI><a href="#[8b]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;CRC_Cal
 <LI><a href="#[a0]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__aeabi_f2d
 <LI><a href="#[b0]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__aeabi_cdcmple
@@ -569,7 +571,7 @@ Global Symbols
 <BR>[Called By]<UL><LI><a href="#[85]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;main
 </UL>
 
-<P><STRONG><a name="[85]"></a>main</STRONG> (Thumb, 1984 bytes, Stack size 96 bytes, main.o(.text))
+<P><STRONG><a name="[85]"></a>main</STRONG> (Thumb, 2030 bytes, Stack size 96 bytes, main.o(.text))
 <BR><BR>[Stack]<UL><LI>Max Depth = 768 + Unknown Stack Size
 <LI>Call Chain = main &rArr; CMD_Handler &rArr; SCA_Lookup &rArr; lookupActuators &rArr; __2printf &rArr; _printf_char_file &rArr; _printf_char_common &rArr; __printf
 </UL>
@@ -3880,7 +3882,7 @@ Local Symbols
 <LI><a href="#[c5]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;CMD_Handler
 </UL>
 
-<P><STRONG><a name="[c5]"></a>CMD_Handler</STRONG> (Thumb, 13212 bytes, Stack size 128 bytes, main.o(.text))
+<P><STRONG><a name="[c5]"></a>CMD_Handler</STRONG> (Thumb, 13208 bytes, Stack size 128 bytes, main.o(.text))
 <BR><BR>[Stack]<UL><LI>Max Depth = 672 + Unknown Stack Size
 <LI>Call Chain = CMD_Handler &rArr; SCA_Lookup &rArr; lookupActuators &rArr; __2printf &rArr; _printf_char_file &rArr; _printf_char_common &rArr; __printf
 </UL>

@@ -37,6 +37,7 @@ float r1_0[3][3];
 float r2_0[3][3];
 float r3_0[3][3];
 float r4_0[3][3];
+float t4angle=0;
 
 //offset matrix
 float porg_1_0[3][1];
@@ -652,6 +653,7 @@ char calculate_inverse(float x4, float y4, float z4, float *t1, float *t2, float
 		t4_array[1] = 0 - *t2 - *t3;
 		t4_array[2] = 180 - *t2 - *t3;
 		t4_array[3] = 360 - *t2 - *t3;
+		t4_array[3]=t4angle-*t2 - *t3;
 		//find the nearest
 		float tmp_t4f = 370;
 		for (i = 1; i < 4; i++)
@@ -1266,6 +1268,9 @@ u8 parse_cmd(CMD_STRUCT *command)
 			case 3:
 			{
 				printf("cmd 3, relative position cmd\n");
+				float a1,a2,a3,a4;
+				position_2_angle(&a1, &a2, &a3, &a4);
+				t4angle=a2+a3+a4;
 				int32_t tpdata = (((int32_t)tmp_buffer[6]) << 24) | (((int32_t)tmp_buffer[7]) << 16) | (((int32_t)tmp_buffer[8]) << 8) | (((int32_t)tmp_buffer[9]));
 				float tppos = (float)tpdata / (float)100.0;
 				u8 cmddir = tmp_buffer[5];
@@ -1338,6 +1343,9 @@ u8 parse_cmd(CMD_STRUCT *command)
 			case 4:
 			{
 				printf("cmd4, abs position cmd\n");
+				float a1,a2,a3,a4;
+				position_2_angle(&a1, &a2, &a3, &a4);
+				t4angle=a2+a3+a4;
 				TIM_Cmd(TIM6, DISABLE);
 				int32_t tprx = (((int32_t)tmp_buffer[5]) << 24) | (((int32_t)tmp_buffer[6]) << 16) | (((int32_t)tmp_buffer[7]) << 8) | (((int32_t)tmp_buffer[8]));
 				int32_t tpry = (((int32_t)tmp_buffer[9]) << 24) | (((int32_t)tmp_buffer[10]) << 16) | (((int32_t)tmp_buffer[11]) << 8) | (((int32_t)tmp_buffer[12]));
