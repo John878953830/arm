@@ -37,7 +37,7 @@ float r1_0[3][3];
 float r2_0[3][3];
 float r3_0[3][3];
 float r4_0[3][3];
-float t4angle=0;
+float t4angle = 0;
 
 //offset matrix
 float porg_1_0[3][1];
@@ -68,6 +68,7 @@ u32 trace_point_max = 0;
 volatile STEP_STRUCT step_value;
 volatile u8 update_next_pos_flag = 0;
 volatile STEP_SPEED_STRUCT step_speed_value;
+u8 work_model = 0;
 /* Forward Declaration -----------------------------------------------------------*/
 static void Log(void);
 static void CMD_Handler(uint8_t cmd);
@@ -305,6 +306,12 @@ void motor_parameter_init(void)
 	step_speed_value.spx = 3;
 	step_speed_value.spy = 3;
 	step_speed_value.spz = 3;
+
+	//init current set
+	setCurrentLimit(1, 30, Block);
+	setCurrentLimit(2, 30, Block);
+	setCurrentLimit(3, 16, Block);
+	setCurrentLimit(4, 16, Block);
 
 	return;
 }
@@ -551,6 +558,7 @@ char calculate_inverse(float x4, float y4, float z4, float *t1, float *t2, float
 	}
 	else
 	{
+		u8 choose_flag[5] = {0};
 		float tmp_b = L1 + D3;
 		//int a_dir = 0;
 		float tmp_a = sqrtf(x4 * x4 + y4 * y4 - tmp_b * tmp_b);
@@ -586,6 +594,7 @@ char calculate_inverse(float x4, float y4, float z4, float *t1, float *t2, float
 			}
 		}
 		float _t1 = t1_array[index];
+		choose_flag[1] |= (1 << index);
 		if (x4 * x4 + y4 * y4 - tmp_b * tmp_b < 0)
 		{
 			return 3;
@@ -615,6 +624,15 @@ char calculate_inverse(float x4, float y4, float z4, float *t1, float *t2, float
 
 		//find the nearest
 		_t3 = __fabs(ct3 - t3_array[1]) < __fabs(ct3 - t3_array[2]) ? t3_array[1] : t3_array[2];
+		if (__fabs(ct3 - t3_array[1]) < __fabs(ct3 - t3_array[2]))
+		{
+			choose_flag[3] |= (1 << 1);
+		}
+		else
+		{
+			choose_flag[3] |= (1 << 2);
+		}
+
 		//printf("theta 3       %f\n", _t3);
 		*t3 = _t3;
 
@@ -644,7 +662,7 @@ char calculate_inverse(float x4, float y4, float z4, float *t1, float *t2, float
 				tmp_t2f = __fabs(ct2 - R2A(t2_array[i]));
 			}
 		}
-
+		choose_flag[2] |= (1 << index);
 		//printf("t2 is   %f\n", R2A(t2_array[index]));
 		*t2 = R2A(t2_array[index]);
 
@@ -653,7 +671,7 @@ char calculate_inverse(float x4, float y4, float z4, float *t1, float *t2, float
 		t4_array[1] = 0 - *t2 - *t3;
 		t4_array[2] = 180 - *t2 - *t3;
 		t4_array[3] = 360 - *t2 - *t3;
-		t4_array[3]=t4angle-*t2 - *t3;
+		t4_array[3] = t4angle - *t2 - *t3;
 		//find the nearest
 		float tmp_t4f = 370;
 		for (i = 1; i < 4; i++)
@@ -666,6 +684,164 @@ char calculate_inverse(float x4, float y4, float z4, float *t1, float *t2, float
 		}
 		//printf("t4 is   %f\n", t4_array[index]);
 		*t4 = t4_array[index];
+		choose_flag[4] |= (1 << index);
+
+		if (work_model == 1)
+		{
+			//confirm position
+			float cx, cy, cz;
+			calculate_position_xyz(*t1, *t2, *t3, *t4, &cx, &cy, &cz);
+			u8 re_counter = 0;
+			while (__fabs(cx - x4) > 0.2 || __fabs(cy - y4) > 0.2 || __fabs(cz - z4) > 0.2)
+			{
+				if (re_counter > 3)
+				{
+					cmd_s.px = current_position.x;
+					cmd_s.py = current_position.y;
+					cmd_s.pz = current_position.z;
+					return 8;
+				}
+				t1_sin_value = (tmp_a * y4 - tmp_b * x4) / (x4 * x4 + y4 * y4);
+				if (__fabs(t1_sin_value) > 1)
+				{
+					return 2;
+				}
+				//calculate the theta 1 when tmp_a > 0
+				t1_tmp = asinf(t1_sin_value);
+				t1_array[1] = R2A(t1_tmp) > 180 ? t1_tmp - 360 : R2A(t1_tmp);
+				t1_array[2] = (180 - R2A(t1_tmp)) > 180 ? 180 - R2A(t1_tmp) - 360 : 180 - R2A(t1_tmp);
+				//printf("tmp t1 1 2 is       %f      %f\n", t1_array[1], t1_array[2]);
+
+				//calculate the theta1 when a < 0
+				tmp_a = -tmp_a;
+				t1_sin_value = (tmp_a * y4 - tmp_b * x4) / (x4 * x4 + y4 * y4);
+				t1_tmp = asinf(t1_sin_value);
+				t1_array[3] = R2A(t1_tmp) > 180 ? t1_tmp - 360 : R2A(t1_tmp);
+				t1_array[4] = (180 - R2A(t1_tmp)) > 180 ? 180 - R2A(t1_tmp) - 360 : 180 - R2A(t1_tmp);
+				//printf("tmp t1    %f      %f    %f    %f\n", t1_array[1], t1_array[2], t1_array[3], t1_array[4]);
+				//find the nearest one to t1a
+				i = 1;
+				index = 1;
+				tmpt1_f = 370;
+				for (i = 1; i < 5; i++)
+				{
+					if (__fabs(ct1 - t1_array[i]) < tmpt1_f)
+					{
+
+						if ((choose_flag[1] & (1 << i)) == 0)
+						{
+							index = i;
+							tmpt1_f = __fabs(ct1 - t1_array[i]);
+						}
+					}
+				}
+				_t1 = t1_array[index];
+				if (x4 * x4 + y4 * y4 - tmp_b * tmp_b < 0)
+				{
+					return 3;
+				}
+				if (index == 1 || index == 2)
+				{
+					//a_dir = 1;
+					tmp_a = sqrtf(x4 * x4 + y4 * y4 - tmp_b * tmp_b);
+				}
+				else
+				{
+					//a_dir = -1;
+					tmp_a = -sqrtf(x4 * x4 + y4 * y4 - tmp_b * tmp_b);
+				}
+				//printf("theta 1       %f\n", _t1);
+				choose_flag[1] |= (1 << index);
+				*t1 = _t1;
+
+				if (__fabs((x4 * x4 + y4 * y4 + z4 * z4 - tmp_b * tmp_b - L2 * L2 - L3 * L3) / 2 / L2 / L3) > 1)
+				{
+					return 4;
+				}
+				_t3 = acosf((x4 * x4 + y4 * y4 + z4 * z4 - tmp_b * tmp_b - L2 * L2 - L3 * L3) / 2 / L2 / L3);
+				t3_array[1] = R2A(_t3);
+				t3_array[2] = 180 + R2A(_t3) > 180 ? -R2A(_t3) : 180 + R2A(_t3);
+				//printf("theta 3   %f, %f\n", t3_array[1], t3_array[2]);
+
+				//find the nearest
+				i = 1;
+				index = 1;
+				tmpt1_f = 370;
+				for (i = 1; i < 3; i++)
+				{
+					if (__fabs(ct3 - t1_array[i]) < tmpt1_f)
+					{
+
+						if ((choose_flag[3] & (1 << i)) == 0)
+						{
+							index = i;
+							tmpt1_f = __fabs(ct3 - t1_array[i]);
+						}
+					}
+				}
+				choose_flag[3] |= (1 << i);
+
+				//printf("theta 3       %f\n", _t3);
+				*t3 = _t3;
+
+				mod = sqrtf(L3 * L3 + L2 * L2 + 2 * L2 * L3 * cosf(A2R(_t3)));
+
+				if (__fabs(tmp_a / mod) > 1 || __fabs((L3 * cosf(A2R(_t3)) + L2) / mod) > 1)
+				{
+					return 5;
+				}
+				tmpt2 = acosf(tmp_a / mod);
+				tmpt2_0 = acosf((L3 * cosf(A2R(_t3)) + L2) / mod);
+
+				t2_array[1] = (tmpt2 - tmpt2_0) > Pi ? (tmpt2 - tmpt2_0) - 2 * Pi : (tmpt2 - tmpt2_0);
+				t2_array[2] = (tmpt2 + tmpt2_0) > Pi ? (tmpt2 + tmpt2_0) - 2 * Pi : (tmpt2 + tmpt2_0);
+				t2_array[3] = (-tmpt2 - tmpt2_0) > Pi ? (-tmpt2 - tmpt2_0) - 2 * Pi : (-tmpt2 - tmpt2_0);
+				t2_array[4] = (-tmpt2 + tmpt2_0) > Pi ? (-tmpt2 + tmpt2_0) - 2 * Pi : (-tmpt2 + tmpt2_0);
+
+				//printf("t2 %f,   %f   %f   %f\n", R2A(t2_array[1]), R2A(t2_array[2]), R2A(t2_array[3]), R2A(t2_array[4]));
+				//find the nearest
+				tmp_t2f = 370;
+				for (i = 1; i < 5; i++)
+				{
+					if (__fabs(ct2 - R2A(t2_array[i])) < tmp_t2f)
+					{
+						if ((choose_flag[2] & (1 << i)) == 0)
+						{
+							index = i;
+							tmp_t2f = __fabs(ct2 - R2A(t2_array[i]));
+						}
+					}
+				}
+				choose_flag[2] |= (1 << index);
+				//printf("t2 is   %f\n", R2A(t2_array[index]));
+				*t2 = R2A(t2_array[index]);
+
+				//calculate theta 4
+				t4_array[1] = 0 - *t2 - *t3;
+				t4_array[2] = 180 - *t2 - *t3;
+				t4_array[3] = 360 - *t2 - *t3;
+				t4_array[3] = t4angle - *t2 - *t3;
+				//find the nearest
+				tmp_t4f = 370;
+				for (i = 1; i < 4; i++)
+				{
+					if (__fabs(ct4 - t4_array[i]) < tmp_t4f)
+					{
+						if ((choose_flag[4] & (1 << i)) == 0)
+						{
+
+							index = i;
+							tmp_t4f = __fabs(ct4 - t4_array[i]);
+						}
+					}
+				}
+				//printf("t4 is   %f\n", t4_array[index]);
+				*t4 = t4_array[index];
+				choose_flag[4] |= (1 << index);
+				calculate_position_xyz(*t1, *t2, *t3, *t4, &cx, &cy, &cz);
+				re_counter++;
+			}
+		}
 	}
 
 	return 0;
@@ -954,6 +1130,27 @@ void return_ack(u8 cmdtype)
 		cmd_s.cmd_if_finished = 1;
 		break;
 	}
+	case 2:
+	{
+		u8 sendbuffer[14] = {0};
+		sendbuffer[0] = 0xFF;
+		sendbuffer[1] = 0xFF;
+		sendbuffer[2] = 0x00;
+		sendbuffer[3] = 0x0B;
+		sendbuffer[4] = (u8)(cmd_s.cmd_index >> 8);
+		sendbuffer[5] = (u8)(cmd_s.cmd_index & 0xFF);
+		sendbuffer[6] = 0x09;
+		sendbuffer[7] = 0x00;
+		sendbuffer[8] = 0x00;
+		u32 crc_res = CRC_Cal(&sendbuffer[2], 7);
+		sendbuffer[9] = (u8)((int32_t)crc_res >> 24);
+		sendbuffer[10] = (u8)((int32_t)crc_res >> 16);
+		sendbuffer[11] = (u8)((int32_t)crc_res >> 8);
+		sendbuffer[12] = (u8)((int32_t)crc_res & 0xFF);
+		USART1_SendStr(sendbuffer, 13);
+		cmd_s.cmd_if_finished = 1;
+		break;
+	}
 	}
 	return;
 }
@@ -1031,7 +1228,7 @@ u8 parse_cmd(CMD_STRUCT *command)
 	{
 		cmd_s.cmd_if_correct = 1;
 		//copy out the data
-		u8 tmp_buffer[100];
+		u8 tmp_buffer[200];
 		u8 k = 0;
 		loop_head->data = 0;
 		loop_head->if_processed = 0;
@@ -1116,6 +1313,7 @@ u8 parse_cmd(CMD_STRUCT *command)
 			{
 			case 10:
 			{
+				return_ack(cmd_s.cmd_type);
 				u8 *tmpdata = &tmp_buffer[5];
 				u8 tk = 0;
 				for (tk = 0; tk < cmd_s.data_length - 5; tk++)
@@ -1126,7 +1324,10 @@ u8 parse_cmd(CMD_STRUCT *command)
 						if (tk + 1 <= 4)
 						{
 							enableActuator(tk + 1);
-							activateActuatorMode(tk + 1, SCA_Profile_Position_Mode, Block);
+							while (activateActuatorMode(tk + 1, SCA_Profile_Position_Mode, Block))
+							{
+								delay_ms(10);
+							}
 						}
 					}
 					tmpdata++;
@@ -1140,6 +1341,7 @@ u8 parse_cmd(CMD_STRUCT *command)
 			}
 			case 11:
 			{
+				return_ack(cmd_s.cmd_type);
 				u8 *tmpdata = &tmp_buffer[5];
 				u8 tk = 0;
 				cmd_s.target_motor = 0xFF;
@@ -1160,6 +1362,7 @@ u8 parse_cmd(CMD_STRUCT *command)
 			}
 			case 12:
 			{
+				return_ack(cmd_s.cmd_type);
 				u8 *tmpdata = &tmp_buffer[5];
 				u8 tk = 0;
 				cmd_s.target_motor = 0xFF;
@@ -1185,6 +1388,7 @@ u8 parse_cmd(CMD_STRUCT *command)
 			}
 			case 13:
 			{
+				return_ack(cmd_s.cmd_type);
 				u8 tpid = tmp_buffer[5];
 				if (tpid > 4)
 				{
@@ -1268,9 +1472,9 @@ u8 parse_cmd(CMD_STRUCT *command)
 			case 3:
 			{
 				printf("cmd 3, relative position cmd\n");
-				float a1,a2,a3,a4;
+				float a1, a2, a3, a4;
 				position_2_angle(&a1, &a2, &a3, &a4);
-				t4angle=a2+a3+a4;
+				t4angle = a2 + a3 + a4;
 				int32_t tpdata = (((int32_t)tmp_buffer[6]) << 24) | (((int32_t)tmp_buffer[7]) << 16) | (((int32_t)tmp_buffer[8]) << 8) | (((int32_t)tmp_buffer[9]));
 				float tppos = (float)tpdata / (float)100.0;
 				u8 cmddir = tmp_buffer[5];
@@ -1343,9 +1547,9 @@ u8 parse_cmd(CMD_STRUCT *command)
 			case 4:
 			{
 				printf("cmd4, abs position cmd\n");
-				float a1,a2,a3,a4;
+				float a1, a2, a3, a4;
 				position_2_angle(&a1, &a2, &a3, &a4);
-				t4angle=a2+a3+a4;
+				t4angle = a2 + a3 + a4;
 				TIM_Cmd(TIM6, DISABLE);
 				int32_t tprx = (((int32_t)tmp_buffer[5]) << 24) | (((int32_t)tmp_buffer[6]) << 16) | (((int32_t)tmp_buffer[7]) << 8) | (((int32_t)tmp_buffer[8]));
 				int32_t tpry = (((int32_t)tmp_buffer[9]) << 24) | (((int32_t)tmp_buffer[10]) << 16) | (((int32_t)tmp_buffer[11]) << 8) | (((int32_t)tmp_buffer[12]));
@@ -1366,7 +1570,15 @@ u8 parse_cmd(CMD_STRUCT *command)
 				cmd_s.ry = fry;
 				cmd_s.rz = frz;
 				printf("%f, %f, %f, %f, %f, %f\n", frx, fry, frz, fpx, fpy, fpz);
-				TIM_Cmd(TIM6, ENABLE);
+				if (work_model == 0)
+				{
+
+					TIM_Cmd(TIM6, ENABLE);
+				}
+				if (work_model == 1)
+				{
+					update_next_pos_flag = 1;
+				}
 				return_ack(cmd_s.cmd_type);
 				break;
 			}
@@ -1391,6 +1603,9 @@ u8 parse_cmd(CMD_STRUCT *command)
 		{
 			printf("set frame, function code  %d\n", cmd_s.function_code);
 			cmd_s.cmd_type = 2;
+			return_ack(cmd_s.cmd_type);
+			work_model = tmp_buffer[5];
+			return_completed();
 		}
 		if (len == 6)
 		{
@@ -1447,6 +1662,20 @@ int main(void)
 	TIM_init(600 - 1, 9000 - 1, 6);
 
 	//TIM_Cmd(TIM6, ENABLE);
+	while (1)
+	{
+		SCA_Lookup();
+		if (total_motor_number != 4)
+		{
+			delay_ms(10);
+		}
+		else
+		{
+			SCA_Init();
+			delay_ms(1000);
+			break;
+		}
+	}
 
 	motor_parameter_init();
 	init_loop_buf();
@@ -1476,52 +1705,62 @@ int main(void)
 		{
 			update_next_pos_flag = 0;
 			float xn, yn, zn;
-			if (__fabs(current_position.x - cmd_s.px) > 10 * step_value.sx)
+			if (work_model == 0)
 			{
-				xn = current_position.x + (cmd_s.px - current_position.x) / __fabs(current_position.x - cmd_s.px) * 5; //__fabs(current_position.x - cmd_s.px) / 5.0;
-			}
-			else
-			{
-				if (__fabs(current_position.x - cmd_s.px) < step_value.sx)
-				{
-					xn = current_position.x;
-				}
-				else
-				{
-					xn = current_position.x + (cmd_s.px - current_position.x) / 2; // / __fabs(current_position.x - cmd_s.px) * step_value.sx / 2.0;
-				}
-			}
 
-			if (__fabs(current_position.y - cmd_s.py) > 10 * step_value.sy)
-			{
-				yn = current_position.y + (cmd_s.py - current_position.y) / __fabs(current_position.y - cmd_s.py) * 5; //__fabs(current_position.y - cmd_s.py) / 5.0;
-			}
-			else
-			{
-				if (__fabs(current_position.y - cmd_s.py) < step_value.sy)
+				if (__fabs(current_position.x - cmd_s.px) > 10 * step_value.sx)
 				{
-					yn = current_position.y;
+					xn = current_position.x + (cmd_s.px - current_position.x) / __fabs(current_position.x - cmd_s.px) * 5; //__fabs(current_position.x - cmd_s.px) / 5.0;
 				}
 				else
 				{
-					yn = current_position.y + (cmd_s.py - current_position.y) / 2; // / __fabs(current_position.y - cmd_s.py) * step_value.sy / 2.0;
+					if (__fabs(current_position.x - cmd_s.px) < step_value.sx)
+					{
+						xn = current_position.x;
+					}
+					else
+					{
+						xn = current_position.x + (cmd_s.px - current_position.x) / 2; // / __fabs(current_position.x - cmd_s.px) * step_value.sx / 2.0;
+					}
 				}
-			}
 
-			if (__fabs(current_position.z - cmd_s.pz) > 10 * step_value.sz)
-			{
-				zn = current_position.z + (cmd_s.pz - current_position.z) / __fabs(current_position.z - cmd_s.pz) * 5; //__fabs(current_position.z - cmd_s.pz) / 5.0;
-			}
-			else
-			{
-				if (__fabs(current_position.z - cmd_s.pz) < step_value.sz)
+				if (__fabs(current_position.y - cmd_s.py) > 10 * step_value.sy)
 				{
-					zn = current_position.z;
+					yn = current_position.y + (cmd_s.py - current_position.y) / __fabs(current_position.y - cmd_s.py) * 5; //__fabs(current_position.y - cmd_s.py) / 5.0;
 				}
 				else
 				{
-					zn = current_position.z + (cmd_s.pz - current_position.z) / 2; //__fabs(current_position.z - cmd_s.pz) * step_value.sz / 2.0;
+					if (__fabs(current_position.y - cmd_s.py) < step_value.sy)
+					{
+						yn = current_position.y;
+					}
+					else
+					{
+						yn = current_position.y + (cmd_s.py - current_position.y) / 2; // / __fabs(current_position.y - cmd_s.py) * step_value.sy / 2.0;
+					}
 				}
+
+				if (__fabs(current_position.z - cmd_s.pz) > 10 * step_value.sz)
+				{
+					zn = current_position.z + (cmd_s.pz - current_position.z) / __fabs(current_position.z - cmd_s.pz) * 5; //__fabs(current_position.z - cmd_s.pz) / 5.0;
+				}
+				else
+				{
+					if (__fabs(current_position.z - cmd_s.pz) < step_value.sz)
+					{
+						zn = current_position.z;
+					}
+					else
+					{
+						zn = current_position.z + (cmd_s.pz - current_position.z) / 2; //__fabs(current_position.z - cmd_s.pz) * step_value.sz / 2.0;
+					}
+				}
+			}
+			if (work_model == 1)
+			{
+				xn = cmd_s.px;
+				yn = cmd_s.py;
+				zn = cmd_s.pz;
 			}
 
 			float t1, t2, t3, t4;
@@ -1557,7 +1796,15 @@ int main(void)
 					sv2 = __fabs(sv2) < 0.1 ? 0 : sv2;
 					sv3 = __fabs(sv3) < 0.1 ? 0 : sv3;
 					sv4 = __fabs(sv4) < 0.1 ? 0 : sv4;
-					angle_act_position(sv1, sv2, sv3, sv4, sp1, sp2, sp3, sp4);
+					if (work_model == 0)
+					{
+
+						angle_act_position(sv1, sv2, sv3, sv4, sp1, sp2, sp3, sp4);
+					}
+					if (work_model == 1)
+					{
+						angle_act_position(sv1, sv2, sv3, sv4, sp1, sp2, sp3, sp4);
+					}
 				}
 				else
 				{
@@ -1571,24 +1818,6 @@ int main(void)
 			}
 
 			update_next_pos_flag = 0;
-		}
-		if (if_need_lookup_monitor)
-		{
-			if (lookup_counter > 10)
-			{
-				if_error = 100;
-			}
-			else
-			{
-				lookup_counter++;
-				SCA_Lookup();
-				SCA_Init();
-				delay_ms(1000);
-			}
-		}
-		else
-		{
-			lookup_counter = 0;
 		}
 	}
 }

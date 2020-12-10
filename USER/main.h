@@ -54,6 +54,7 @@ extern volatile u8 update_next_pos_flag;
 extern u32 trace_point_counter;
 extern u32 trace_point_max;
 extern float t4angle;
+extern u8 work_model;
 
 typedef struct loop_buffer
 {
