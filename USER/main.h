@@ -104,6 +104,11 @@ extern float porg_2_1[3][1];
 extern float porg_3_2[3][1];
 extern float porg_4_3[3][1];
 
+extern unsigned int tim3pre;
+extern unsigned int tim4pre;
+extern unsigned int tim13pre;
+extern unsigned int tim14pre;
+
 typedef struct motor_parameter
 {
     float angle_dir;
@@ -159,6 +164,16 @@ typedef struct sys_parameter
 } SYS_PARAMETER;
 
 extern SYS_PARAMETER sys_p;
+
+typedef struct inverse_tes_struct
+{
+    float t1;
+    float t2;
+    float t3;
+    float t4;
+} ITS;
+
+extern ITS its_value[100];
 
 /**
  * @brief calculate the rotation matrix

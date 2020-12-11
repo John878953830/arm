@@ -3,11 +3,11 @@
 <title>Static Call Graph - [.\Object\SCA_Controller.axf]</title></head>
 <body><HR>
 <H1>Static Call Graph for image .\Object\SCA_Controller.axf</H1><HR>
-<BR><P>#&#060CALLGRAPH&#062# ARM Linker, 5060422: Last Updated: Thu Dec 10 19:50:59 2020
+<BR><P>#&#060CALLGRAPH&#062# ARM Linker, 5060422: Last Updated: Fri Dec 11 11:56:05 2020
 <BR><P>
-<H3>Maximum Stack Usage =        768 bytes + Unknown(Functions without stacksize, Cycles, Untraceable Function Pointers)</H3><H3>
+<H3>Maximum Stack Usage =        816 bytes + Unknown(Functions without stacksize, Cycles, Untraceable Function Pointers)</H3><H3>
 Call chain for Maximum Stack Depth:</H3>
-__rt_entry_main &rArr; main &rArr; CMD_Handler &rArr; SCA_Lookup &rArr; lookupActuators &rArr; __2printf &rArr; _printf_char_file &rArr; _printf_char_common &rArr; __printf
+__rt_entry_main &rArr; main &rArr; CMD_Handler &rArr; calculate_inverse &rArr; calculate_position_xyz &rArr; __hardfp_sin &rArr; __ieee754_rem_pio2 &rArr; __aeabi_dmul
 <P>
 <H3>
 Functions with no stack information
@@ -147,8 +147,8 @@ Function Pointers
 Global Symbols
 </H3>
 <P><STRONG><a name="[6e]"></a>__main</STRONG> (Thumb, 8 bytes, Stack size 0 bytes, __main.o(!!!main))
-<BR><BR>[Calls]<UL><LI><a href="#[70]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__rt_entry
-<LI><a href="#[6f]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__scatterload
+<BR><BR>[Calls]<UL><LI><a href="#[6f]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__scatterload
+<LI><a href="#[70]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__rt_entry
 </UL>
 
 <P><STRONG><a name="[6f]"></a>__scatterload</STRONG> (Thumb, 0 bytes, Stack size unknown bytes, __scatter.o(!!!scatter))
@@ -303,8 +303,8 @@ Global Symbols
 <P><STRONG><a name="[1e9]"></a>__rt_entry_postsh_1</STRONG> (Thumb, 0 bytes, Stack size unknown bytes, __rtentry2.o(.ARM.Collect$$rtentry$$00000009))
 
 <P><STRONG><a name="[84]"></a>__rt_entry_main</STRONG> (Thumb, 0 bytes, Stack size unknown bytes, __rtentry2.o(.ARM.Collect$$rtentry$$0000000D))
-<BR><BR>[Stack]<UL><LI>Max Depth = 768 + Unknown Stack Size
-<LI>Call Chain = __rt_entry_main &rArr; main &rArr; CMD_Handler &rArr; SCA_Lookup &rArr; lookupActuators &rArr; __2printf &rArr; _printf_char_file &rArr; _printf_char_common &rArr; __printf
+<BR><BR>[Stack]<UL><LI>Max Depth = 816 + Unknown Stack Size
+<LI>Call Chain = __rt_entry_main &rArr; main &rArr; CMD_Handler &rArr; calculate_inverse &rArr; calculate_position_xyz &rArr; __hardfp_sin &rArr; __ieee754_rem_pio2 &rArr; __aeabi_dmul
 </UL>
 <BR>[Calls]<UL><LI><a href="#[85]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;main
 <LI><a href="#[86]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;exit
@@ -369,11 +369,11 @@ Global Symbols
 <BR>[Calls]<UL><LI><a href="#[8c]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;CRC_ResetDR
 <LI><a href="#[8d]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;CRC_CalcCRC
 </UL>
-<BR>[Called By]<UL><LI><a href="#[bf]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;parse_cmd
-<LI><a href="#[be]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;return_failed
-<LI><a href="#[bd]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;return_ack
-<LI><a href="#[bc]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;return_data
-<LI><a href="#[ac]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;return_completed
+<BR>[Called By]<UL><LI><a href="#[c0]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;parse_cmd
+<LI><a href="#[bf]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;return_failed
+<LI><a href="#[be]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;return_ack
+<LI><a href="#[bd]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;return_data
+<LI><a href="#[ab]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;return_completed
 </UL>
 
 <P><STRONG><a name="[8e]"></a>calculate_r_1_0</STRONG> (Thumb, 170 bytes, Stack size 16 bytes, main.o(.text), UNUSED)
@@ -434,40 +434,40 @@ Global Symbols
 <LI><a href="#[c8]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;CMD_Handler
 </UL>
 
-<P><STRONG><a name="[ab]"></a>position_2_angle</STRONG> (Thumb, 278 bytes, Stack size 32 bytes, main.o(.text))
+<P><STRONG><a name="[ab]"></a>return_completed</STRONG> (Thumb, 202 bytes, Stack size 32 bytes, main.o(.text))
+<BR><BR>[Stack]<UL><LI>Max Depth = 168<LI>Call Chain = return_completed &rArr; CRC_Cal
+</UL>
+<BR>[Calls]<UL><LI><a href="#[ad]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;USART1_SendStr
+<LI><a href="#[8b]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;CRC_Cal
+<LI><a href="#[ac]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__aeabi_memclr4
+</UL>
+<BR>[Called By]<UL><LI><a href="#[44]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;TIM6_DAC_IRQHandler
+<LI><a href="#[c0]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;parse_cmd
+<LI><a href="#[af]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;update_status
+</UL>
+
+<P><STRONG><a name="[ae]"></a>position_2_angle</STRONG> (Thumb, 224 bytes, Stack size 32 bytes, main.o(.text))
 <BR><BR>[Stack]<UL><LI>Max Depth = 32<LI>Call Chain = position_2_angle
 </UL>
 <BR>[Calls]<UL><LI><a href="#[a9]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;getInstance
 </UL>
 <BR>[Called By]<UL><LI><a href="#[85]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;main
-<LI><a href="#[bf]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;parse_cmd
-<LI><a href="#[bc]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;return_data
+<LI><a href="#[c0]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;parse_cmd
+<LI><a href="#[bd]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;return_data
 <LI><a href="#[b7]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;calculate_inverse
 <LI><a href="#[af]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;update_status
 <LI><a href="#[c8]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;CMD_Handler
 </UL>
 
-<P><STRONG><a name="[ac]"></a>return_completed</STRONG> (Thumb, 146 bytes, Stack size 32 bytes, main.o(.text))
-<BR><BR>[Stack]<UL><LI>Max Depth = 168<LI>Call Chain = return_completed &rArr; CRC_Cal
-</UL>
-<BR>[Calls]<UL><LI><a href="#[ae]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;USART1_SendStr
-<LI><a href="#[8b]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;CRC_Cal
-<LI><a href="#[ad]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__aeabi_memclr4
-</UL>
-<BR>[Called By]<UL><LI><a href="#[44]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;TIM6_DAC_IRQHandler
-<LI><a href="#[bf]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;parse_cmd
-<LI><a href="#[af]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;update_status
-</UL>
-
-<P><STRONG><a name="[af]"></a>update_status</STRONG> (Thumb, 402 bytes, Stack size 48 bytes, main.o(.text))
+<P><STRONG><a name="[af]"></a>update_status</STRONG> (Thumb, 488 bytes, Stack size 48 bytes, main.o(.text))
 <BR><BR>[Stack]<UL><LI>Max Depth = 336 + Unknown Stack Size
 <LI>Call Chain = update_status &rArr; calculate_position_xyz &rArr; __hardfp_sin &rArr; __ieee754_rem_pio2 &rArr; __aeabi_dmul
 </UL>
 <BR>[Calls]<UL><LI><a href="#[b1]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;requestCVPValue
 <LI><a href="#[b0]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;isOnline
 <LI><a href="#[a9]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;getInstance
-<LI><a href="#[ac]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;return_completed
-<LI><a href="#[ab]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;position_2_angle
+<LI><a href="#[ae]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;position_2_angle
+<LI><a href="#[ab]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;return_completed
 <LI><a href="#[a1]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;calculate_position_xyz
 <LI><a href="#[a2]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__aeabi_f2d
 <LI><a href="#[b2]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__aeabi_cdcmple
@@ -476,7 +476,7 @@ Global Symbols
 <BR>[Called By]<UL><LI><a href="#[85]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;main
 </UL>
 
-<P><STRONG><a name="[b4]"></a>motor_act_position</STRONG> (Thumb, 180 bytes, Stack size 24 bytes, main.o(.text))
+<P><STRONG><a name="[b4]"></a>motor_act_position</STRONG> (Thumb, 328 bytes, Stack size 24 bytes, main.o(.text))
 <BR><BR>[Stack]<UL><LI>Max Depth = 24<LI>Call Chain = motor_act_position
 </UL>
 <BR>[Calls]<UL><LI><a href="#[a9]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;getInstance
@@ -486,7 +486,7 @@ Global Symbols
 <LI><a href="#[c8]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;CMD_Handler
 </UL>
 
-<P><STRONG><a name="[b6]"></a>angle_act_position</STRONG> (Thumb, 308 bytes, Stack size 56 bytes, main.o(.text))
+<P><STRONG><a name="[b6]"></a>angle_act_position</STRONG> (Thumb, 200 bytes, Stack size 56 bytes, main.o(.text))
 <BR><BR>[Stack]<UL><LI>Max Depth = 80<LI>Call Chain = angle_act_position &rArr; motor_act_position
 </UL>
 <BR>[Calls]<UL><LI><a href="#[b4]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;motor_act_position
@@ -495,11 +495,11 @@ Global Symbols
 <LI><a href="#[c8]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;CMD_Handler
 </UL>
 
-<P><STRONG><a name="[b7]"></a>calculate_inverse</STRONG> (Thumb, 5834 bytes, Stack size 232 bytes, main.o(.text))
-<BR><BR>[Stack]<UL><LI>Max Depth = 520 + Unknown Stack Size
+<P><STRONG><a name="[b7]"></a>calculate_inverse</STRONG> (Thumb, 4576 bytes, Stack size 304 bytes, main.o(.text))
+<BR><BR>[Stack]<UL><LI>Max Depth = 592 + Unknown Stack Size
 <LI>Call Chain = calculate_inverse &rArr; calculate_position_xyz &rArr; __hardfp_sin &rArr; __ieee754_rem_pio2 &rArr; __aeabi_dmul
 </UL>
-<BR>[Calls]<UL><LI><a href="#[ab]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;position_2_angle
+<BR>[Calls]<UL><LI><a href="#[ae]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;position_2_angle
 <LI><a href="#[a1]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;calculate_position_xyz
 <LI><a href="#[b8]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__hardfp_sqrtf
 <LI><a href="#[8f]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__hardfp_cosf
@@ -508,6 +508,7 @@ Global Symbols
 <LI><a href="#[a2]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__aeabi_f2d
 <LI><a href="#[b9]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__aeabi_cdrcmple
 <LI><a href="#[b2]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__aeabi_cdcmple
+<LI><a href="#[bc]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__aeabi_dadd
 <LI><a href="#[a7]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__aeabi_d2f
 <LI><a href="#[b3]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__2printf
 </UL>
@@ -515,74 +516,74 @@ Global Symbols
 <LI><a href="#[c8]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;CMD_Handler
 </UL>
 
-<P><STRONG><a name="[bc]"></a>return_data</STRONG> (Thumb, 1808 bytes, Stack size 104 bytes, main.o(.text))
+<P><STRONG><a name="[bd]"></a>return_data</STRONG> (Thumb, 1802 bytes, Stack size 104 bytes, main.o(.text))
 <BR><BR>[Stack]<UL><LI>Max Depth = 240 + Unknown Stack Size
 <LI>Call Chain = return_data &rArr; CRC_Cal
 </UL>
 <BR>[Calls]<UL><LI><a href="#[a9]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;getInstance
-<LI><a href="#[ae]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;USART1_SendStr
-<LI><a href="#[ab]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;position_2_angle
+<LI><a href="#[ad]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;USART1_SendStr
+<LI><a href="#[ae]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;position_2_angle
 <LI><a href="#[8b]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;CRC_Cal
-<LI><a href="#[ad]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__aeabi_memclr4
+<LI><a href="#[ac]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__aeabi_memclr4
 <LI><a href="#[b3]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__2printf
 </UL>
-<BR>[Called By]<UL><LI><a href="#[bf]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;parse_cmd
+<BR>[Called By]<UL><LI><a href="#[c0]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;parse_cmd
 </UL>
 
-<P><STRONG><a name="[bd]"></a>return_ack</STRONG> (Thumb, 254 bytes, Stack size 32 bytes, main.o(.text))
+<P><STRONG><a name="[be]"></a>return_ack</STRONG> (Thumb, 254 bytes, Stack size 32 bytes, main.o(.text))
 <BR><BR>[Stack]<UL><LI>Max Depth = 168<LI>Call Chain = return_ack &rArr; CRC_Cal
 </UL>
-<BR>[Calls]<UL><LI><a href="#[ae]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;USART1_SendStr
+<BR>[Calls]<UL><LI><a href="#[ad]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;USART1_SendStr
 <LI><a href="#[8b]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;CRC_Cal
 </UL>
-<BR>[Called By]<UL><LI><a href="#[bf]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;parse_cmd
+<BR>[Called By]<UL><LI><a href="#[c0]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;parse_cmd
 </UL>
 
-<P><STRONG><a name="[be]"></a>return_failed</STRONG> (Thumb, 144 bytes, Stack size 32 bytes, main.o(.text))
+<P><STRONG><a name="[bf]"></a>return_failed</STRONG> (Thumb, 156 bytes, Stack size 32 bytes, main.o(.text))
 <BR><BR>[Stack]<UL><LI>Max Depth = 168<LI>Call Chain = return_failed &rArr; CRC_Cal
 </UL>
-<BR>[Calls]<UL><LI><a href="#[ae]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;USART1_SendStr
+<BR>[Calls]<UL><LI><a href="#[ad]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;USART1_SendStr
 <LI><a href="#[8b]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;CRC_Cal
-<LI><a href="#[ad]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__aeabi_memclr4
+<LI><a href="#[ac]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__aeabi_memclr4
 </UL>
 <BR>[Called By]<UL><LI><a href="#[85]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;main
 <LI><a href="#[c8]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;CMD_Handler
 </UL>
 
-<P><STRONG><a name="[bf]"></a>parse_cmd</STRONG> (Thumb, 4192 bytes, Stack size 376 bytes, main.o(.text))
+<P><STRONG><a name="[c0]"></a>parse_cmd</STRONG> (Thumb, 4168 bytes, Stack size 376 bytes, main.o(.text))
 <BR><BR>[Stack]<UL><LI>Max Depth = 616 + Unknown Stack Size
 <LI>Call Chain = parse_cmd &rArr; return_data &rArr; CRC_Cal
 </UL>
-<BR>[Calls]<UL><LI><a href="#[c5]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;setVelocity
+<BR>[Calls]<UL><LI><a href="#[c6]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;setVelocity
 <LI><a href="#[aa]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;setPosition
 <LI><a href="#[a9]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;getInstance
-<LI><a href="#[c1]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;enableActuator
-<LI><a href="#[c4]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;disableActuator
-<LI><a href="#[c0]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;delay_us
-<LI><a href="#[c2]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;delay_ms
-<LI><a href="#[c3]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;activateActuatorMode
-<LI><a href="#[ae]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;USART1_SendStr
+<LI><a href="#[c2]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;enableActuator
+<LI><a href="#[c5]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;disableActuator
+<LI><a href="#[c1]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;delay_us
+<LI><a href="#[c3]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;delay_ms
+<LI><a href="#[c4]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;activateActuatorMode
+<LI><a href="#[ad]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;USART1_SendStr
 <LI><a href="#[b5]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;TIM_Cmd
-<LI><a href="#[bd]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;return_ack
-<LI><a href="#[bc]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;return_data
-<LI><a href="#[ac]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;return_completed
-<LI><a href="#[ab]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;position_2_angle
+<LI><a href="#[be]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;return_ack
+<LI><a href="#[bd]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;return_data
+<LI><a href="#[ae]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;position_2_angle
+<LI><a href="#[ab]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;return_completed
 <LI><a href="#[8b]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;CRC_Cal
 <LI><a href="#[a2]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__aeabi_f2d
 <LI><a href="#[b2]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__aeabi_cdcmple
 <LI><a href="#[a6]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__aeabi_dsub
-<LI><a href="#[c6]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__aeabi_dadd
+<LI><a href="#[bc]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__aeabi_dadd
 <LI><a href="#[a7]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__aeabi_d2f
 <LI><a href="#[b3]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__2printf
 </UL>
 <BR>[Called By]<UL><LI><a href="#[85]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;main
 </UL>
 
-<P><STRONG><a name="[85]"></a>main</STRONG> (Thumb, 2126 bytes, Stack size 96 bytes, main.o(.text))
-<BR><BR>[Stack]<UL><LI>Max Depth = 768 + Unknown Stack Size
-<LI>Call Chain = main &rArr; CMD_Handler &rArr; SCA_Lookup &rArr; lookupActuators &rArr; __2printf &rArr; _printf_char_file &rArr; _printf_char_common &rArr; __printf
+<P><STRONG><a name="[85]"></a>main</STRONG> (Thumb, 2050 bytes, Stack size 96 bytes, main.o(.text))
+<BR><BR>[Stack]<UL><LI>Max Depth = 816 + Unknown Stack Size
+<LI>Call Chain = main &rArr; CMD_Handler &rArr; calculate_inverse &rArr; calculate_position_xyz &rArr; __hardfp_sin &rArr; __ieee754_rem_pio2 &rArr; __aeabi_dmul
 </UL>
-<BR>[Calls]<UL><LI><a href="#[c2]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;delay_ms
+<BR>[Calls]<UL><LI><a href="#[c3]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;delay_ms
 <LI><a href="#[cf]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;TIM_init
 <LI><a href="#[b5]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;TIM_Cmd
 <LI><a href="#[ce]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;TIM2_init
@@ -590,12 +591,12 @@ Global Symbols
 <LI><a href="#[ca]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;SCA_Init
 <LI><a href="#[cd]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;RCC_AHB1PeriphClockCmd
 <LI><a href="#[cc]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;BSP_Init
-<LI><a href="#[bf]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;parse_cmd
-<LI><a href="#[be]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;return_failed
+<LI><a href="#[c0]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;parse_cmd
+<LI><a href="#[bf]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;return_failed
 <LI><a href="#[b7]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;calculate_inverse
 <LI><a href="#[b6]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;angle_act_position
 <LI><a href="#[af]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;update_status
-<LI><a href="#[ab]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;position_2_angle
+<LI><a href="#[ae]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;position_2_angle
 <LI><a href="#[9f]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;motor_parameter_init
 <LI><a href="#[d0]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;init_loop_buf
 <LI><a href="#[c8]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;CMD_Handler
@@ -606,7 +607,7 @@ Global Symbols
 <LI><a href="#[b2]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__aeabi_cdcmple
 <LI><a href="#[d1]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__aeabi_ui2d
 <LI><a href="#[a3]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__aeabi_ddiv
-<LI><a href="#[c6]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__aeabi_dadd
+<LI><a href="#[bc]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__aeabi_dadd
 <LI><a href="#[a7]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__aeabi_d2f
 <LI><a href="#[b3]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__2printf
 </UL>
@@ -767,8 +768,8 @@ Global Symbols
 <P><STRONG><a name="[ed]"></a>SCA_Homing</STRONG> (Thumb, 190 bytes, Stack size 8 bytes, sca_app.o(.text), UNUSED)
 <BR><BR>[Calls]<UL><LI><a href="#[ee]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;getPosition
 <LI><a href="#[aa]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;setPosition
-<LI><a href="#[c2]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;delay_ms
-<LI><a href="#[c3]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;activateActuatorMode
+<LI><a href="#[c3]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;delay_ms
+<LI><a href="#[c4]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;activateActuatorMode
 </UL>
 <BR>[Called By]<UL><LI><a href="#[ef]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;SCA_Exp1
 </UL>
@@ -777,14 +778,14 @@ Global Symbols
 <BR><BR>[Calls]<UL><LI><a href="#[f0]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;setPositionFast
 <LI><a href="#[ed]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;SCA_Homing
 <LI><a href="#[aa]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;setPosition
-<LI><a href="#[c2]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;delay_ms
+<LI><a href="#[c3]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;delay_ms
 </UL>
 
 <P><STRONG><a name="[f1]"></a>SCA_Exp2</STRONG> (Thumb, 192 bytes, Stack size 8 bytes, sca_app.o(.text), UNUSED)
 <BR><BR>[Calls]<UL><LI><a href="#[f2]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;setVelocityFast
-<LI><a href="#[c5]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;setVelocity
-<LI><a href="#[c2]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;delay_ms
-<LI><a href="#[c3]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;activateActuatorMode
+<LI><a href="#[c6]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;setVelocity
+<LI><a href="#[c3]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;delay_ms
+<LI><a href="#[c4]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;activateActuatorMode
 </UL>
 
 <P><STRONG><a name="[a9]"></a>getInstance</STRONG> (Thumb, 50 bytes, Stack size 0 bytes, sca_api.o(.text))
@@ -876,20 +877,20 @@ Global Symbols
 <LI><a href="#[f5]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;resetController
 <LI><a href="#[ee]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;getPosition
 <LI><a href="#[e2]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;canDispatch
-<LI><a href="#[c5]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;setVelocity
+<LI><a href="#[c6]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;setVelocity
 <LI><a href="#[aa]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;setPosition
 <LI><a href="#[a0]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;setCurrentLimit
 <LI><a href="#[b1]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;requestCVPValue
 <LI><a href="#[b0]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;isOnline
-<LI><a href="#[c1]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;enableActuator
-<LI><a href="#[c4]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;disableActuator
-<LI><a href="#[c3]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;activateActuatorMode
+<LI><a href="#[c2]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;enableActuator
+<LI><a href="#[c5]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;disableActuator
+<LI><a href="#[c4]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;activateActuatorMode
 <LI><a href="#[ca]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;SCA_Init
-<LI><a href="#[bf]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;parse_cmd
-<LI><a href="#[bc]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;return_data
+<LI><a href="#[c0]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;parse_cmd
+<LI><a href="#[bd]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;return_data
 <LI><a href="#[b4]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;motor_act_position
 <LI><a href="#[af]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;update_status
-<LI><a href="#[ab]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;position_2_angle
+<LI><a href="#[ae]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;position_2_angle
 <LI><a href="#[a8]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;motor_act
 </UL>
 
@@ -898,7 +899,7 @@ Global Symbols
 </UL>
 <BR>[Calls]<UL><LI><a href="#[f3]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;SCA_Read
 <LI><a href="#[a9]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;getInstance
-<LI><a href="#[c0]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;delay_us
+<LI><a href="#[c1]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;delay_us
 </UL>
 <BR>[Called By]<UL><LI><a href="#[ea]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;lookupActuators
 <LI><a href="#[af]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;update_status
@@ -921,7 +922,7 @@ Global Symbols
 
 <P><STRONG><a name="[f5]"></a>resetController</STRONG> (Thumb, 138 bytes, Stack size 24 bytes, sca_api.o(.text), UNUSED)
 <BR><BR>[Calls]<UL><LI><a href="#[a9]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;getInstance
-<LI><a href="#[ad]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__aeabi_memclr4
+<LI><a href="#[ac]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__aeabi_memclr4
 </UL>
 
 <P><STRONG><a name="[f6]"></a>isEnable</STRONG> (Thumb, 96 bytes, Stack size 24 bytes, sca_api.o(.text))
@@ -929,10 +930,10 @@ Global Symbols
 </UL>
 <BR>[Calls]<UL><LI><a href="#[f3]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;SCA_Read
 <LI><a href="#[a9]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;getInstance
-<LI><a href="#[c0]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;delay_us
+<LI><a href="#[c1]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;delay_us
 </UL>
-<BR>[Called By]<UL><LI><a href="#[c1]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;enableActuator
-<LI><a href="#[c4]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;disableActuator
+<BR>[Called By]<UL><LI><a href="#[c2]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;enableActuator
+<LI><a href="#[c5]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;disableActuator
 </UL>
 
 <P><STRONG><a name="[f7]"></a>isUpdate</STRONG> (Thumb, 30 bytes, Stack size 16 bytes, sca_api.o(.text), UNUSED)
@@ -944,7 +945,7 @@ Global Symbols
 </UL>
 <BR>[Calls]<UL><LI><a href="#[f3]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;SCA_Read
 <LI><a href="#[a9]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;getInstance
-<LI><a href="#[c0]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;delay_us
+<LI><a href="#[c1]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;delay_us
 </UL>
 <BR>[Called By]<UL><LI><a href="#[11e]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;regainAttrbute
 </UL>
@@ -954,7 +955,7 @@ Global Symbols
 </UL>
 <BR>[Calls]<UL><LI><a href="#[f3]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;SCA_Read
 <LI><a href="#[a9]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;getInstance
-<LI><a href="#[c0]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;delay_us
+<LI><a href="#[c1]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;delay_us
 </UL>
 <BR>[Called By]<UL><LI><a href="#[11e]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;regainAttrbute
 </UL>
@@ -964,7 +965,7 @@ Global Symbols
 </UL>
 <BR>[Calls]<UL><LI><a href="#[f3]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;SCA_Read
 <LI><a href="#[a9]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;getInstance
-<LI><a href="#[c0]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;delay_us
+<LI><a href="#[c1]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;delay_us
 </UL>
 <BR>[Called By]<UL><LI><a href="#[11e]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;regainAttrbute
 </UL>
@@ -974,7 +975,7 @@ Global Symbols
 </UL>
 <BR>[Calls]<UL><LI><a href="#[f3]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;SCA_Read
 <LI><a href="#[a9]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;getInstance
-<LI><a href="#[c0]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;delay_us
+<LI><a href="#[c1]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;delay_us
 </UL>
 <BR>[Called By]<UL><LI><a href="#[11e]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;regainAttrbute
 </UL>
@@ -984,7 +985,7 @@ Global Symbols
 </UL>
 <BR>[Calls]<UL><LI><a href="#[f3]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;SCA_Read
 <LI><a href="#[a9]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;getInstance
-<LI><a href="#[c0]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;delay_us
+<LI><a href="#[c1]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;delay_us
 </UL>
 <BR>[Called By]<UL><LI><a href="#[11e]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;regainAttrbute
 </UL>
@@ -994,7 +995,7 @@ Global Symbols
 </UL>
 <BR>[Calls]<UL><LI><a href="#[f3]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;SCA_Read
 <LI><a href="#[a9]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;getInstance
-<LI><a href="#[c0]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;delay_us
+<LI><a href="#[c1]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;delay_us
 </UL>
 <BR>[Called By]<UL><LI><a href="#[11e]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;regainAttrbute
 </UL>
@@ -1004,7 +1005,7 @@ Global Symbols
 </UL>
 <BR>[Calls]<UL><LI><a href="#[f3]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;SCA_Read
 <LI><a href="#[a9]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;getInstance
-<LI><a href="#[c0]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;delay_us
+<LI><a href="#[c1]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;delay_us
 </UL>
 <BR>[Called By]<UL><LI><a href="#[11e]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;regainAttrbute
 </UL>
@@ -1014,7 +1015,7 @@ Global Symbols
 </UL>
 <BR>[Calls]<UL><LI><a href="#[f3]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;SCA_Read
 <LI><a href="#[a9]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;getInstance
-<LI><a href="#[c0]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;delay_us
+<LI><a href="#[c1]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;delay_us
 </UL>
 <BR>[Called By]<UL><LI><a href="#[11e]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;regainAttrbute
 </UL>
@@ -1024,7 +1025,7 @@ Global Symbols
 </UL>
 <BR>[Calls]<UL><LI><a href="#[f3]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;SCA_Read
 <LI><a href="#[a9]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;getInstance
-<LI><a href="#[c0]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;delay_us
+<LI><a href="#[c1]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;delay_us
 </UL>
 <BR>[Called By]<UL><LI><a href="#[11e]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;regainAttrbute
 </UL>
@@ -1034,7 +1035,7 @@ Global Symbols
 </UL>
 <BR>[Calls]<UL><LI><a href="#[f3]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;SCA_Read
 <LI><a href="#[a9]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;getInstance
-<LI><a href="#[c0]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;delay_us
+<LI><a href="#[c1]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;delay_us
 </UL>
 <BR>[Called By]<UL><LI><a href="#[11e]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;regainAttrbute
 </UL>
@@ -1044,7 +1045,7 @@ Global Symbols
 </UL>
 <BR>[Calls]<UL><LI><a href="#[f3]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;SCA_Read
 <LI><a href="#[a9]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;getInstance
-<LI><a href="#[c0]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;delay_us
+<LI><a href="#[c1]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;delay_us
 </UL>
 <BR>[Called By]<UL><LI><a href="#[11e]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;regainAttrbute
 </UL>
@@ -1054,7 +1055,7 @@ Global Symbols
 </UL>
 <BR>[Calls]<UL><LI><a href="#[f3]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;SCA_Read
 <LI><a href="#[a9]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;getInstance
-<LI><a href="#[c0]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;delay_us
+<LI><a href="#[c1]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;delay_us
 </UL>
 <BR>[Called By]<UL><LI><a href="#[11e]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;regainAttrbute
 </UL>
@@ -1064,7 +1065,7 @@ Global Symbols
 </UL>
 <BR>[Calls]<UL><LI><a href="#[f3]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;SCA_Read
 <LI><a href="#[a9]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;getInstance
-<LI><a href="#[c0]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;delay_us
+<LI><a href="#[c1]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;delay_us
 </UL>
 <BR>[Called By]<UL><LI><a href="#[11e]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;regainAttrbute
 </UL>
@@ -1074,7 +1075,7 @@ Global Symbols
 </UL>
 <BR>[Calls]<UL><LI><a href="#[f3]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;SCA_Read
 <LI><a href="#[a9]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;getInstance
-<LI><a href="#[c0]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;delay_us
+<LI><a href="#[c1]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;delay_us
 </UL>
 <BR>[Called By]<UL><LI><a href="#[11e]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;regainAttrbute
 </UL>
@@ -1084,7 +1085,7 @@ Global Symbols
 </UL>
 <BR>[Calls]<UL><LI><a href="#[f3]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;SCA_Read
 <LI><a href="#[a9]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;getInstance
-<LI><a href="#[c0]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;delay_us
+<LI><a href="#[c1]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;delay_us
 </UL>
 <BR>[Called By]<UL><LI><a href="#[11e]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;regainAttrbute
 </UL>
@@ -1094,7 +1095,7 @@ Global Symbols
 </UL>
 <BR>[Calls]<UL><LI><a href="#[f3]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;SCA_Read
 <LI><a href="#[a9]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;getInstance
-<LI><a href="#[c0]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;delay_us
+<LI><a href="#[c1]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;delay_us
 </UL>
 <BR>[Called By]<UL><LI><a href="#[11e]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;regainAttrbute
 </UL>
@@ -1104,7 +1105,7 @@ Global Symbols
 </UL>
 <BR>[Calls]<UL><LI><a href="#[f3]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;SCA_Read
 <LI><a href="#[a9]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;getInstance
-<LI><a href="#[c0]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;delay_us
+<LI><a href="#[c1]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;delay_us
 </UL>
 <BR>[Called By]<UL><LI><a href="#[11e]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;regainAttrbute
 </UL>
@@ -1114,7 +1115,7 @@ Global Symbols
 </UL>
 <BR>[Calls]<UL><LI><a href="#[f3]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;SCA_Read
 <LI><a href="#[a9]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;getInstance
-<LI><a href="#[c0]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;delay_us
+<LI><a href="#[c1]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;delay_us
 </UL>
 <BR>[Called By]<UL><LI><a href="#[11e]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;regainAttrbute
 </UL>
@@ -1124,7 +1125,7 @@ Global Symbols
 </UL>
 <BR>[Calls]<UL><LI><a href="#[f3]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;SCA_Read
 <LI><a href="#[a9]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;getInstance
-<LI><a href="#[c0]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;delay_us
+<LI><a href="#[c1]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;delay_us
 </UL>
 <BR>[Called By]<UL><LI><a href="#[11e]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;regainAttrbute
 </UL>
@@ -1134,7 +1135,7 @@ Global Symbols
 </UL>
 <BR>[Calls]<UL><LI><a href="#[f3]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;SCA_Read
 <LI><a href="#[a9]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;getInstance
-<LI><a href="#[c0]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;delay_us
+<LI><a href="#[c1]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;delay_us
 </UL>
 <BR>[Called By]<UL><LI><a href="#[11e]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;regainAttrbute
 </UL>
@@ -1144,7 +1145,7 @@ Global Symbols
 </UL>
 <BR>[Calls]<UL><LI><a href="#[f3]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;SCA_Read
 <LI><a href="#[a9]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;getInstance
-<LI><a href="#[c0]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;delay_us
+<LI><a href="#[c1]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;delay_us
 </UL>
 <BR>[Called By]<UL><LI><a href="#[11e]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;regainAttrbute
 </UL>
@@ -1154,7 +1155,7 @@ Global Symbols
 </UL>
 <BR>[Calls]<UL><LI><a href="#[f3]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;SCA_Read
 <LI><a href="#[a9]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;getInstance
-<LI><a href="#[c0]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;delay_us
+<LI><a href="#[c1]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;delay_us
 </UL>
 <BR>[Called By]<UL><LI><a href="#[11e]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;regainAttrbute
 </UL>
@@ -1164,7 +1165,7 @@ Global Symbols
 </UL>
 <BR>[Calls]<UL><LI><a href="#[f3]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;SCA_Read
 <LI><a href="#[a9]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;getInstance
-<LI><a href="#[c0]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;delay_us
+<LI><a href="#[c1]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;delay_us
 </UL>
 <BR>[Called By]<UL><LI><a href="#[11e]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;regainAttrbute
 </UL>
@@ -1174,7 +1175,7 @@ Global Symbols
 </UL>
 <BR>[Calls]<UL><LI><a href="#[f3]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;SCA_Read
 <LI><a href="#[a9]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;getInstance
-<LI><a href="#[c0]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;delay_us
+<LI><a href="#[c1]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;delay_us
 </UL>
 <BR>[Called By]<UL><LI><a href="#[11e]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;regainAttrbute
 </UL>
@@ -1184,7 +1185,7 @@ Global Symbols
 </UL>
 <BR>[Calls]<UL><LI><a href="#[f3]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;SCA_Read
 <LI><a href="#[a9]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;getInstance
-<LI><a href="#[c0]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;delay_us
+<LI><a href="#[c1]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;delay_us
 </UL>
 <BR>[Called By]<UL><LI><a href="#[11e]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;regainAttrbute
 </UL>
@@ -1194,7 +1195,7 @@ Global Symbols
 </UL>
 <BR>[Calls]<UL><LI><a href="#[f3]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;SCA_Read
 <LI><a href="#[a9]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;getInstance
-<LI><a href="#[c0]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;delay_us
+<LI><a href="#[c1]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;delay_us
 </UL>
 <BR>[Called By]<UL><LI><a href="#[11e]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;regainAttrbute
 </UL>
@@ -1204,7 +1205,7 @@ Global Symbols
 </UL>
 <BR>[Calls]<UL><LI><a href="#[f3]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;SCA_Read
 <LI><a href="#[a9]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;getInstance
-<LI><a href="#[c0]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;delay_us
+<LI><a href="#[c1]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;delay_us
 </UL>
 <BR>[Called By]<UL><LI><a href="#[11e]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;regainAttrbute
 </UL>
@@ -1214,7 +1215,7 @@ Global Symbols
 </UL>
 <BR>[Calls]<UL><LI><a href="#[f3]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;SCA_Read
 <LI><a href="#[a9]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;getInstance
-<LI><a href="#[c0]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;delay_us
+<LI><a href="#[c1]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;delay_us
 </UL>
 <BR>[Called By]<UL><LI><a href="#[11e]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;regainAttrbute
 </UL>
@@ -1224,7 +1225,7 @@ Global Symbols
 </UL>
 <BR>[Calls]<UL><LI><a href="#[f3]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;SCA_Read
 <LI><a href="#[a9]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;getInstance
-<LI><a href="#[c0]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;delay_us
+<LI><a href="#[c1]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;delay_us
 </UL>
 <BR>[Called By]<UL><LI><a href="#[11e]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;regainAttrbute
 </UL>
@@ -1234,7 +1235,7 @@ Global Symbols
 </UL>
 <BR>[Calls]<UL><LI><a href="#[f3]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;SCA_Read
 <LI><a href="#[a9]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;getInstance
-<LI><a href="#[c0]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;delay_us
+<LI><a href="#[c1]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;delay_us
 </UL>
 <BR>[Called By]<UL><LI><a href="#[11e]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;regainAttrbute
 </UL>
@@ -1244,7 +1245,7 @@ Global Symbols
 </UL>
 <BR>[Calls]<UL><LI><a href="#[f3]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;SCA_Read
 <LI><a href="#[a9]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;getInstance
-<LI><a href="#[c0]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;delay_us
+<LI><a href="#[c1]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;delay_us
 </UL>
 <BR>[Called By]<UL><LI><a href="#[11e]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;regainAttrbute
 </UL>
@@ -1254,7 +1255,7 @@ Global Symbols
 </UL>
 <BR>[Calls]<UL><LI><a href="#[f3]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;SCA_Read
 <LI><a href="#[a9]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;getInstance
-<LI><a href="#[c0]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;delay_us
+<LI><a href="#[c1]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;delay_us
 </UL>
 <BR>[Called By]<UL><LI><a href="#[11e]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;regainAttrbute
 </UL>
@@ -1264,7 +1265,7 @@ Global Symbols
 </UL>
 <BR>[Calls]<UL><LI><a href="#[f3]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;SCA_Read
 <LI><a href="#[a9]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;getInstance
-<LI><a href="#[c0]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;delay_us
+<LI><a href="#[c1]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;delay_us
 </UL>
 <BR>[Called By]<UL><LI><a href="#[11e]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;regainAttrbute
 </UL>
@@ -1274,7 +1275,7 @@ Global Symbols
 </UL>
 <BR>[Calls]<UL><LI><a href="#[f3]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;SCA_Read
 <LI><a href="#[a9]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;getInstance
-<LI><a href="#[c0]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;delay_us
+<LI><a href="#[c1]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;delay_us
 </UL>
 <BR>[Called By]<UL><LI><a href="#[11e]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;regainAttrbute
 </UL>
@@ -1284,7 +1285,7 @@ Global Symbols
 </UL>
 <BR>[Calls]<UL><LI><a href="#[f3]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;SCA_Read
 <LI><a href="#[a9]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;getInstance
-<LI><a href="#[c0]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;delay_us
+<LI><a href="#[c1]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;delay_us
 </UL>
 <BR>[Called By]<UL><LI><a href="#[11e]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;regainAttrbute
 </UL>
@@ -1294,7 +1295,7 @@ Global Symbols
 </UL>
 <BR>[Calls]<UL><LI><a href="#[f3]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;SCA_Read
 <LI><a href="#[a9]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;getInstance
-<LI><a href="#[c0]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;delay_us
+<LI><a href="#[c1]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;delay_us
 </UL>
 <BR>[Called By]<UL><LI><a href="#[11e]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;regainAttrbute
 </UL>
@@ -1304,7 +1305,7 @@ Global Symbols
 </UL>
 <BR>[Calls]<UL><LI><a href="#[f3]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;SCA_Read
 <LI><a href="#[a9]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;getInstance
-<LI><a href="#[c0]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;delay_us
+<LI><a href="#[c1]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;delay_us
 </UL>
 <BR>[Called By]<UL><LI><a href="#[11e]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;regainAttrbute
 </UL>
@@ -1314,7 +1315,7 @@ Global Symbols
 </UL>
 <BR>[Calls]<UL><LI><a href="#[f3]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;SCA_Read
 <LI><a href="#[a9]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;getInstance
-<LI><a href="#[c0]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;delay_us
+<LI><a href="#[c1]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;delay_us
 </UL>
 <BR>[Called By]<UL><LI><a href="#[11e]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;regainAttrbute
 <LI><a href="#[af]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;update_status
@@ -1325,7 +1326,7 @@ Global Symbols
 </UL>
 <BR>[Calls]<UL><LI><a href="#[f3]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;SCA_Read
 <LI><a href="#[a9]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;getInstance
-<LI><a href="#[c0]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;delay_us
+<LI><a href="#[c1]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;delay_us
 </UL>
 <BR>[Called By]<UL><LI><a href="#[11e]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;regainAttrbute
 </UL>
@@ -1373,7 +1374,7 @@ Global Symbols
 <LI><a href="#[f8]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;getInverterRecoveryTemperature
 <LI><a href="#[b1]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;requestCVPValue
 </UL>
-<BR>[Called By]<UL><LI><a href="#[c1]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;enableActuator
+<BR>[Called By]<UL><LI><a href="#[c2]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;enableActuator
 </UL>
 
 <P><STRONG><a name="[11f]"></a>getCurrentRange</STRONG> (Thumb, 100 bytes, Stack size 24 bytes, sca_api.o(.text))
@@ -1381,9 +1382,9 @@ Global Symbols
 </UL>
 <BR>[Calls]<UL><LI><a href="#[f3]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;SCA_Read
 <LI><a href="#[a9]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;getInstance
-<LI><a href="#[c0]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;delay_us
+<LI><a href="#[c1]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;delay_us
 </UL>
-<BR>[Called By]<UL><LI><a href="#[c1]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;enableActuator
+<BR>[Called By]<UL><LI><a href="#[c2]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;enableActuator
 </UL>
 
 <P><STRONG><a name="[120]"></a>getActuatorLastState</STRONG> (Thumb, 96 bytes, Stack size 24 bytes, sca_api.o(.text))
@@ -1391,9 +1392,9 @@ Global Symbols
 </UL>
 <BR>[Calls]<UL><LI><a href="#[f3]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;SCA_Read
 <LI><a href="#[a9]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;getInstance
-<LI><a href="#[c0]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;delay_us
+<LI><a href="#[c1]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;delay_us
 </UL>
-<BR>[Called By]<UL><LI><a href="#[c1]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;enableActuator
+<BR>[Called By]<UL><LI><a href="#[c2]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;enableActuator
 </UL>
 
 <P><STRONG><a name="[121]"></a>getActuatorSerialNumber</STRONG> (Thumb, 100 bytes, Stack size 24 bytes, sca_api.o(.text))
@@ -1401,12 +1402,12 @@ Global Symbols
 </UL>
 <BR>[Calls]<UL><LI><a href="#[f3]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;SCA_Read
 <LI><a href="#[a9]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;getInstance
-<LI><a href="#[c0]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;delay_us
+<LI><a href="#[c1]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;delay_us
 </UL>
-<BR>[Called By]<UL><LI><a href="#[c1]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;enableActuator
+<BR>[Called By]<UL><LI><a href="#[c2]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;enableActuator
 </UL>
 
-<P><STRONG><a name="[c1]"></a>enableActuator</STRONG> (Thumb, 194 bytes, Stack size 24 bytes, sca_api.o(.text))
+<P><STRONG><a name="[c2]"></a>enableActuator</STRONG> (Thumb, 194 bytes, Stack size 24 bytes, sca_api.o(.text))
 <BR><BR>[Stack]<UL><LI>Max Depth = 152 + Unknown Stack Size
 <LI>Call Chain = enableActuator &rArr; __2printf &rArr; _printf_char_file &rArr; _printf_char_common &rArr; __printf
 </UL>
@@ -1420,19 +1421,19 @@ Global Symbols
 <LI><a href="#[b3]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__2printf
 </UL>
 <BR>[Called By]<UL><LI><a href="#[ec]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;enableAllActuators
-<LI><a href="#[bf]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;parse_cmd
+<LI><a href="#[c0]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;parse_cmd
 </UL>
 
 <P><STRONG><a name="[ec]"></a>enableAllActuators</STRONG> (Thumb, 34 bytes, Stack size 8 bytes, sca_api.o(.text))
 <BR><BR>[Stack]<UL><LI>Max Depth = 160 + Unknown Stack Size
 <LI>Call Chain = enableAllActuators &rArr; enableActuator &rArr; __2printf &rArr; _printf_char_file &rArr; _printf_char_common &rArr; __printf
 </UL>
-<BR>[Calls]<UL><LI><a href="#[c1]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;enableActuator
+<BR>[Calls]<UL><LI><a href="#[c2]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;enableActuator
 </UL>
 <BR>[Called By]<UL><LI><a href="#[ca]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;SCA_Init
 </UL>
 
-<P><STRONG><a name="[c4]"></a>disableActuator</STRONG> (Thumb, 110 bytes, Stack size 24 bytes, sca_api.o(.text))
+<P><STRONG><a name="[c5]"></a>disableActuator</STRONG> (Thumb, 110 bytes, Stack size 24 bytes, sca_api.o(.text))
 <BR><BR>[Stack]<UL><LI>Max Depth = 88<LI>Call Chain = disableActuator &rArr; isEnable &rArr; SCA_Read &rArr; canTransmit
 </UL>
 <BR>[Calls]<UL><LI><a href="#[122]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;SCA_Write_1
@@ -1440,40 +1441,40 @@ Global Symbols
 <LI><a href="#[a9]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;getInstance
 </UL>
 <BR>[Called By]<UL><LI><a href="#[cb]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;disableAllActuators
-<LI><a href="#[bf]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;parse_cmd
+<LI><a href="#[c0]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;parse_cmd
 </UL>
 
 <P><STRONG><a name="[cb]"></a>disableAllActuators</STRONG> (Thumb, 34 bytes, Stack size 8 bytes, sca_api.o(.text))
 <BR><BR>[Stack]<UL><LI>Max Depth = 96<LI>Call Chain = disableAllActuators &rArr; disableActuator &rArr; isEnable &rArr; SCA_Read &rArr; canTransmit
 </UL>
-<BR>[Calls]<UL><LI><a href="#[c4]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;disableActuator
+<BR>[Calls]<UL><LI><a href="#[c5]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;disableActuator
 </UL>
 <BR>[Called By]<UL><LI><a href="#[c8]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;CMD_Handler
 </UL>
 
-<P><STRONG><a name="[c3]"></a>activateActuatorMode</STRONG> (Thumb, 116 bytes, Stack size 32 bytes, sca_api.o(.text))
+<P><STRONG><a name="[c4]"></a>activateActuatorMode</STRONG> (Thumb, 116 bytes, Stack size 32 bytes, sca_api.o(.text))
 <BR><BR>[Stack]<UL><LI>Max Depth = 80<LI>Call Chain = activateActuatorMode &rArr; SCA_Write_1 &rArr; canTransmit
 </UL>
 <BR>[Calls]<UL><LI><a href="#[122]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;SCA_Write_1
 <LI><a href="#[a9]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;getInstance
-<LI><a href="#[c0]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;delay_us
+<LI><a href="#[c1]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;delay_us
 </UL>
 <BR>[Called By]<UL><LI><a href="#[f1]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;SCA_Exp2
 <LI><a href="#[ed]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;SCA_Homing
-<LI><a href="#[bf]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;parse_cmd
+<LI><a href="#[c0]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;parse_cmd
 <LI><a href="#[c8]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;CMD_Handler
 </UL>
 
 <P><STRONG><a name="[123]"></a>clearError</STRONG> (Thumb, 96 bytes, Stack size 24 bytes, sca_api.o(.text), UNUSED)
 <BR><BR>[Calls]<UL><LI><a href="#[124]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;SCA_Write_4
 <LI><a href="#[a9]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;getInstance
-<LI><a href="#[c0]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;delay_us
+<LI><a href="#[c1]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;delay_us
 </UL>
 
 <P><STRONG><a name="[125]"></a>saveAllParams</STRONG> (Thumb, 96 bytes, Stack size 24 bytes, sca_api.o(.text), UNUSED)
 <BR><BR>[Calls]<UL><LI><a href="#[124]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;SCA_Write_4
 <LI><a href="#[a9]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;getInstance
-<LI><a href="#[c0]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;delay_us
+<LI><a href="#[c1]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;delay_us
 </UL>
 
 <P><STRONG><a name="[aa]"></a>setPosition</STRONG> (Thumb, 46 bytes, Stack size 24 bytes, sca_api.o(.text))
@@ -1488,7 +1489,7 @@ Global Symbols
 <LI><a href="#[2b]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;TIM3_IRQHandler
 <LI><a href="#[ef]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;SCA_Exp1
 <LI><a href="#[ed]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;SCA_Homing
-<LI><a href="#[bf]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;parse_cmd
+<LI><a href="#[c0]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;parse_cmd
 <LI><a href="#[a8]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;motor_act
 </UL>
 
@@ -1501,114 +1502,114 @@ Global Symbols
 <P><STRONG><a name="[ee]"></a>getPosition</STRONG> (Thumb, 100 bytes, Stack size 24 bytes, sca_api.o(.text), UNUSED)
 <BR><BR>[Calls]<UL><LI><a href="#[f3]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;SCA_Read
 <LI><a href="#[a9]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;getInstance
-<LI><a href="#[c0]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;delay_us
+<LI><a href="#[c1]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;delay_us
 </UL>
 <BR>[Called By]<UL><LI><a href="#[ed]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;SCA_Homing
 </UL>
 
 <P><STRONG><a name="[127]"></a>getPositionFast</STRONG> (Thumb, 84 bytes, Stack size 24 bytes, sca_api.o(.text), UNUSED)
 <BR><BR>[Calls]<UL><LI><a href="#[f3]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;SCA_Read
-<LI><a href="#[c0]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;delay_us
+<LI><a href="#[c1]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;delay_us
 </UL>
 
 <P><STRONG><a name="[128]"></a>setPositionKp</STRONG> (Thumb, 120 bytes, Stack size 32 bytes, sca_api.o(.text), UNUSED)
 <BR><BR>[Calls]<UL><LI><a href="#[126]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;SCA_Write_3
 <LI><a href="#[a9]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;getInstance
-<LI><a href="#[c0]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;delay_us
+<LI><a href="#[c1]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;delay_us
 </UL>
 
 <P><STRONG><a name="[129]"></a>setPositionKi</STRONG> (Thumb, 252 bytes, Stack size 32 bytes, sca_api.o(.text), UNUSED)
 <BR><BR>[Calls]<UL><LI><a href="#[126]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;SCA_Write_3
 <LI><a href="#[a9]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;getInstance
-<LI><a href="#[c0]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;delay_us
+<LI><a href="#[c1]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;delay_us
 </UL>
 
 <P><STRONG><a name="[12a]"></a>setPositionUmax</STRONG> (Thumb, 120 bytes, Stack size 32 bytes, sca_api.o(.text), UNUSED)
 <BR><BR>[Calls]<UL><LI><a href="#[126]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;SCA_Write_3
 <LI><a href="#[a9]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;getInstance
-<LI><a href="#[c0]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;delay_us
+<LI><a href="#[c1]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;delay_us
 </UL>
 
 <P><STRONG><a name="[12b]"></a>setPositionUmin</STRONG> (Thumb, 120 bytes, Stack size 32 bytes, sca_api.o(.text), UNUSED)
 <BR><BR>[Calls]<UL><LI><a href="#[126]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;SCA_Write_3
 <LI><a href="#[a9]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;getInstance
-<LI><a href="#[c0]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;delay_us
+<LI><a href="#[c1]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;delay_us
 </UL>
 
 <P><STRONG><a name="[12c]"></a>setPositionOffset</STRONG> (Thumb, 120 bytes, Stack size 32 bytes, sca_api.o(.text), UNUSED)
 <BR><BR>[Calls]<UL><LI><a href="#[126]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;SCA_Write_3
 <LI><a href="#[a9]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;getInstance
-<LI><a href="#[c0]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;delay_us
+<LI><a href="#[c1]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;delay_us
 </UL>
 
 <P><STRONG><a name="[12d]"></a>setMaximumPosition</STRONG> (Thumb, 120 bytes, Stack size 32 bytes, sca_api.o(.text), UNUSED)
 <BR><BR>[Calls]<UL><LI><a href="#[126]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;SCA_Write_3
 <LI><a href="#[a9]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;getInstance
-<LI><a href="#[c0]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;delay_us
+<LI><a href="#[c1]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;delay_us
 </UL>
 
 <P><STRONG><a name="[12e]"></a>setMinimumPosition</STRONG> (Thumb, 120 bytes, Stack size 32 bytes, sca_api.o(.text), UNUSED)
 <BR><BR>[Calls]<UL><LI><a href="#[126]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;SCA_Write_3
 <LI><a href="#[a9]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;getInstance
-<LI><a href="#[c0]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;delay_us
+<LI><a href="#[c1]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;delay_us
 </UL>
 
 <P><STRONG><a name="[12f]"></a>enablePositionLimit</STRONG> (Thumb, 104 bytes, Stack size 32 bytes, sca_api.o(.text), UNUSED)
 <BR><BR>[Calls]<UL><LI><a href="#[122]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;SCA_Write_1
 <LI><a href="#[a9]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;getInstance
-<LI><a href="#[c0]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;delay_us
+<LI><a href="#[c1]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;delay_us
 </UL>
 
 <P><STRONG><a name="[130]"></a>setHomingPosition</STRONG> (Thumb, 120 bytes, Stack size 32 bytes, sca_api.o(.text), UNUSED)
 <BR><BR>[Calls]<UL><LI><a href="#[126]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;SCA_Write_3
 <LI><a href="#[a9]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;getInstance
-<LI><a href="#[c0]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;delay_us
+<LI><a href="#[c1]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;delay_us
 </UL>
 
 <P><STRONG><a name="[131]"></a>enablePositionFilter</STRONG> (Thumb, 104 bytes, Stack size 32 bytes, sca_api.o(.text), UNUSED)
 <BR><BR>[Calls]<UL><LI><a href="#[122]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;SCA_Write_1
 <LI><a href="#[a9]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;getInstance
-<LI><a href="#[c0]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;delay_us
+<LI><a href="#[c1]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;delay_us
 </UL>
 
 <P><STRONG><a name="[132]"></a>setPositionCutoffFrequency</STRONG> (Thumb, 120 bytes, Stack size 32 bytes, sca_api.o(.text), UNUSED)
 <BR><BR>[Calls]<UL><LI><a href="#[133]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;SCA_Write_2
 <LI><a href="#[a9]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;getInstance
-<LI><a href="#[c0]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;delay_us
+<LI><a href="#[c1]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;delay_us
 </UL>
 
 <P><STRONG><a name="[134]"></a>clearHomingInfo</STRONG> (Thumb, 100 bytes, Stack size 24 bytes, sca_api.o(.text), UNUSED)
 <BR><BR>[Calls]<UL><LI><a href="#[124]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;SCA_Write_4
 <LI><a href="#[a9]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;getInstance
-<LI><a href="#[c0]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;delay_us
+<LI><a href="#[c1]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;delay_us
 </UL>
 
 <P><STRONG><a name="[135]"></a>setProfilePositionAcceleration</STRONG> (Thumb, 132 bytes, Stack size 32 bytes, sca_api.o(.text), UNUSED)
 <BR><BR>[Calls]<UL><LI><a href="#[126]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;SCA_Write_3
 <LI><a href="#[a9]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;getInstance
-<LI><a href="#[c0]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;delay_us
+<LI><a href="#[c1]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;delay_us
 </UL>
 
 <P><STRONG><a name="[136]"></a>setProfilePositionDeceleration</STRONG> (Thumb, 132 bytes, Stack size 32 bytes, sca_api.o(.text), UNUSED)
 <BR><BR>[Calls]<UL><LI><a href="#[126]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;SCA_Write_3
 <LI><a href="#[a9]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;getInstance
-<LI><a href="#[c0]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;delay_us
+<LI><a href="#[c1]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;delay_us
 </UL>
 
 <P><STRONG><a name="[137]"></a>setProfilePositionMaxVelocity</STRONG> (Thumb, 132 bytes, Stack size 32 bytes, sca_api.o(.text), UNUSED)
 <BR><BR>[Calls]<UL><LI><a href="#[126]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;SCA_Write_3
 <LI><a href="#[a9]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;getInstance
-<LI><a href="#[c0]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;delay_us
+<LI><a href="#[c1]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;delay_us
 </UL>
 
-<P><STRONG><a name="[c5]"></a>setVelocity</STRONG> (Thumb, 46 bytes, Stack size 24 bytes, sca_api.o(.text))
+<P><STRONG><a name="[c6]"></a>setVelocity</STRONG> (Thumb, 46 bytes, Stack size 24 bytes, sca_api.o(.text))
 <BR><BR>[Stack]<UL><LI>Max Depth = 80<LI>Call Chain = setVelocity &rArr; SCA_Write_3 &rArr; canTransmit
 </UL>
 <BR>[Calls]<UL><LI><a href="#[126]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;SCA_Write_3
 <LI><a href="#[a9]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;getInstance
 </UL>
 <BR>[Called By]<UL><LI><a href="#[f1]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;SCA_Exp2
-<LI><a href="#[bf]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;parse_cmd
+<LI><a href="#[c0]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;parse_cmd
 </UL>
 
 <P><STRONG><a name="[f2]"></a>setVelocityFast</STRONG> (Thumb, 30 bytes, Stack size 16 bytes, sca_api.o(.text), UNUSED)
@@ -1620,36 +1621,36 @@ Global Symbols
 <P><STRONG><a name="[138]"></a>getVelocity</STRONG> (Thumb, 100 bytes, Stack size 24 bytes, sca_api.o(.text), UNUSED)
 <BR><BR>[Calls]<UL><LI><a href="#[f3]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;SCA_Read
 <LI><a href="#[a9]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;getInstance
-<LI><a href="#[c0]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;delay_us
+<LI><a href="#[c1]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;delay_us
 </UL>
 
 <P><STRONG><a name="[139]"></a>getVelocityFast</STRONG> (Thumb, 84 bytes, Stack size 24 bytes, sca_api.o(.text), UNUSED)
 <BR><BR>[Calls]<UL><LI><a href="#[f3]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;SCA_Read
-<LI><a href="#[c0]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;delay_us
+<LI><a href="#[c1]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;delay_us
 </UL>
 
 <P><STRONG><a name="[13a]"></a>setVelocityKp</STRONG> (Thumb, 120 bytes, Stack size 32 bytes, sca_api.o(.text), UNUSED)
 <BR><BR>[Calls]<UL><LI><a href="#[126]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;SCA_Write_3
 <LI><a href="#[a9]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;getInstance
-<LI><a href="#[c0]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;delay_us
+<LI><a href="#[c1]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;delay_us
 </UL>
 
 <P><STRONG><a name="[13b]"></a>setVelocityKi</STRONG> (Thumb, 120 bytes, Stack size 32 bytes, sca_api.o(.text), UNUSED)
 <BR><BR>[Calls]<UL><LI><a href="#[126]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;SCA_Write_3
 <LI><a href="#[a9]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;getInstance
-<LI><a href="#[c0]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;delay_us
+<LI><a href="#[c1]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;delay_us
 </UL>
 
 <P><STRONG><a name="[13c]"></a>setVelocityUmax</STRONG> (Thumb, 120 bytes, Stack size 32 bytes, sca_api.o(.text), UNUSED)
 <BR><BR>[Calls]<UL><LI><a href="#[126]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;SCA_Write_3
 <LI><a href="#[a9]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;getInstance
-<LI><a href="#[c0]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;delay_us
+<LI><a href="#[c1]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;delay_us
 </UL>
 
 <P><STRONG><a name="[13d]"></a>setVelocityUmin</STRONG> (Thumb, 126 bytes, Stack size 32 bytes, sca_api.o(.text), UNUSED)
 <BR><BR>[Calls]<UL><LI><a href="#[126]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;SCA_Write_3
 <LI><a href="#[a9]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;getInstance
-<LI><a href="#[c0]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;delay_us
+<LI><a href="#[c1]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;delay_us
 </UL>
 
 <P><STRONG><a name="[1ed]"></a>getVelocityRange</STRONG> (Thumb, 6 bytes, Stack size 0 bytes, sca_api.o(.text), UNUSED)
@@ -1657,37 +1658,37 @@ Global Symbols
 <P><STRONG><a name="[13e]"></a>enableVelocityFilter</STRONG> (Thumb, 104 bytes, Stack size 32 bytes, sca_api.o(.text), UNUSED)
 <BR><BR>[Calls]<UL><LI><a href="#[122]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;SCA_Write_1
 <LI><a href="#[a9]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;getInstance
-<LI><a href="#[c0]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;delay_us
+<LI><a href="#[c1]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;delay_us
 </UL>
 
 <P><STRONG><a name="[13f]"></a>setVelocityCutoffFrequency</STRONG> (Thumb, 120 bytes, Stack size 32 bytes, sca_api.o(.text), UNUSED)
 <BR><BR>[Calls]<UL><LI><a href="#[133]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;SCA_Write_2
 <LI><a href="#[a9]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;getInstance
-<LI><a href="#[c0]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;delay_us
+<LI><a href="#[c1]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;delay_us
 </UL>
 
 <P><STRONG><a name="[140]"></a>setVelocityLimit</STRONG> (Thumb, 120 bytes, Stack size 32 bytes, sca_api.o(.text), UNUSED)
 <BR><BR>[Calls]<UL><LI><a href="#[126]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;SCA_Write_3
 <LI><a href="#[a9]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;getInstance
-<LI><a href="#[c0]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;delay_us
+<LI><a href="#[c1]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;delay_us
 </UL>
 
 <P><STRONG><a name="[141]"></a>setProfileVelocityAcceleration</STRONG> (Thumb, 132 bytes, Stack size 32 bytes, sca_api.o(.text), UNUSED)
 <BR><BR>[Calls]<UL><LI><a href="#[126]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;SCA_Write_3
 <LI><a href="#[a9]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;getInstance
-<LI><a href="#[c0]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;delay_us
+<LI><a href="#[c1]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;delay_us
 </UL>
 
 <P><STRONG><a name="[142]"></a>setProfileVelocityDeceleration</STRONG> (Thumb, 132 bytes, Stack size 32 bytes, sca_api.o(.text), UNUSED)
 <BR><BR>[Calls]<UL><LI><a href="#[126]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;SCA_Write_3
 <LI><a href="#[a9]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;getInstance
-<LI><a href="#[c0]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;delay_us
+<LI><a href="#[c1]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;delay_us
 </UL>
 
 <P><STRONG><a name="[143]"></a>setProfileVelocityMaxVelocity</STRONG> (Thumb, 132 bytes, Stack size 32 bytes, sca_api.o(.text), UNUSED)
 <BR><BR>[Calls]<UL><LI><a href="#[126]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;SCA_Write_3
 <LI><a href="#[a9]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;getInstance
-<LI><a href="#[c0]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;delay_us
+<LI><a href="#[c1]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;delay_us
 </UL>
 
 <P><STRONG><a name="[144]"></a>setCurrent</STRONG> (Thumb, 46 bytes, Stack size 24 bytes, sca_api.o(.text), UNUSED)
@@ -1702,24 +1703,24 @@ Global Symbols
 <P><STRONG><a name="[146]"></a>getCurrent</STRONG> (Thumb, 100 bytes, Stack size 24 bytes, sca_api.o(.text), UNUSED)
 <BR><BR>[Calls]<UL><LI><a href="#[f3]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;SCA_Read
 <LI><a href="#[a9]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;getInstance
-<LI><a href="#[c0]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;delay_us
+<LI><a href="#[c1]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;delay_us
 </UL>
 
 <P><STRONG><a name="[147]"></a>getCurrentFast</STRONG> (Thumb, 90 bytes, Stack size 24 bytes, sca_api.o(.text), UNUSED)
 <BR><BR>[Calls]<UL><LI><a href="#[f3]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;SCA_Read
-<LI><a href="#[c0]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;delay_us
+<LI><a href="#[c1]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;delay_us
 </UL>
 
 <P><STRONG><a name="[148]"></a>enableCurrentFilter</STRONG> (Thumb, 104 bytes, Stack size 32 bytes, sca_api.o(.text), UNUSED)
 <BR><BR>[Calls]<UL><LI><a href="#[122]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;SCA_Write_1
 <LI><a href="#[a9]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;getInstance
-<LI><a href="#[c0]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;delay_us
+<LI><a href="#[c1]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;delay_us
 </UL>
 
 <P><STRONG><a name="[149]"></a>setCurrentCutoffFrequency</STRONG> (Thumb, 120 bytes, Stack size 32 bytes, sca_api.o(.text), UNUSED)
 <BR><BR>[Calls]<UL><LI><a href="#[133]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;SCA_Write_2
 <LI><a href="#[a9]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;getInstance
-<LI><a href="#[c0]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;delay_us
+<LI><a href="#[c1]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;delay_us
 </UL>
 
 <P><STRONG><a name="[a0]"></a>setCurrentLimit</STRONG> (Thumb, 120 bytes, Stack size 32 bytes, sca_api.o(.text))
@@ -1727,7 +1728,7 @@ Global Symbols
 </UL>
 <BR>[Calls]<UL><LI><a href="#[126]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;SCA_Write_3
 <LI><a href="#[a9]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;getInstance
-<LI><a href="#[c0]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;delay_us
+<LI><a href="#[c1]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;delay_us
 </UL>
 <BR>[Called By]<UL><LI><a href="#[9f]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;motor_parameter_init
 </UL>
@@ -1735,42 +1736,42 @@ Global Symbols
 <P><STRONG><a name="[14a]"></a>setLockEnergy</STRONG> (Thumb, 120 bytes, Stack size 32 bytes, sca_api.o(.text), UNUSED)
 <BR><BR>[Calls]<UL><LI><a href="#[126]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;SCA_Write_3
 <LI><a href="#[a9]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;getInstance
-<LI><a href="#[c0]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;delay_us
+<LI><a href="#[c1]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;delay_us
 </UL>
 
 <P><STRONG><a name="[14b]"></a>setMotorProtectedTemperature</STRONG> (Thumb, 120 bytes, Stack size 32 bytes, sca_api.o(.text), UNUSED)
 <BR><BR>[Calls]<UL><LI><a href="#[133]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;SCA_Write_2
 <LI><a href="#[a9]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;getInstance
-<LI><a href="#[c0]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;delay_us
+<LI><a href="#[c1]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;delay_us
 </UL>
 
 <P><STRONG><a name="[14c]"></a>setMotorRecoveryTemperature</STRONG> (Thumb, 120 bytes, Stack size 32 bytes, sca_api.o(.text), UNUSED)
 <BR><BR>[Calls]<UL><LI><a href="#[133]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;SCA_Write_2
 <LI><a href="#[a9]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;getInstance
-<LI><a href="#[c0]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;delay_us
+<LI><a href="#[c1]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;delay_us
 </UL>
 
 <P><STRONG><a name="[14d]"></a>setInverterProtectedTemperature</STRONG> (Thumb, 120 bytes, Stack size 32 bytes, sca_api.o(.text), UNUSED)
 <BR><BR>[Calls]<UL><LI><a href="#[133]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;SCA_Write_2
 <LI><a href="#[a9]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;getInstance
-<LI><a href="#[c0]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;delay_us
+<LI><a href="#[c1]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;delay_us
 </UL>
 
 <P><STRONG><a name="[14e]"></a>setInverterRecoveryTemperature</STRONG> (Thumb, 120 bytes, Stack size 32 bytes, sca_api.o(.text), UNUSED)
 <BR><BR>[Calls]<UL><LI><a href="#[133]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;SCA_Write_2
 <LI><a href="#[a9]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;getInstance
-<LI><a href="#[c0]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;delay_us
+<LI><a href="#[c1]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;delay_us
 </UL>
 
 <P><STRONG><a name="[14f]"></a>setActuatorID</STRONG> (Thumb, 116 bytes, Stack size 32 bytes, sca_api.o(.text), UNUSED)
 <BR><BR>[Calls]<UL><LI><a href="#[150]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;SCA_Write_5
 <LI><a href="#[a9]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;getInstance
-<LI><a href="#[c0]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;delay_us
+<LI><a href="#[c1]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;delay_us
 </UL>
 
 <P><STRONG><a name="[151]"></a>requestCVPValueFast</STRONG> (Thumb, 84 bytes, Stack size 24 bytes, sca_api.o(.text), UNUSED)
 <BR><BR>[Calls]<UL><LI><a href="#[f3]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;SCA_Read
-<LI><a href="#[c0]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;delay_us
+<LI><a href="#[c1]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;delay_us
 </UL>
 
 <P><STRONG><a name="[122]"></a>SCA_Write_1</STRONG> (Thumb, 28 bytes, Stack size 24 bytes, sca_protocol.o(.text))
@@ -1782,9 +1783,9 @@ Global Symbols
 <LI><a href="#[13e]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;enableVelocityFilter
 <LI><a href="#[131]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;enablePositionFilter
 <LI><a href="#[12f]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;enablePositionLimit
-<LI><a href="#[c1]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;enableActuator
-<LI><a href="#[c4]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;disableActuator
-<LI><a href="#[c3]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;activateActuatorMode
+<LI><a href="#[c2]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;enableActuator
+<LI><a href="#[c5]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;disableActuator
+<LI><a href="#[c4]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;activateActuatorMode
 </UL>
 
 <P><STRONG><a name="[133]"></a>SCA_Write_2</STRONG> (Thumb, 68 bytes, Stack size 32 bytes, sca_protocol.o(.text), UNUSED)
@@ -1828,7 +1829,7 @@ Global Symbols
 <LI><a href="#[128]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;setPositionKp
 <LI><a href="#[f2]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;setVelocityFast
 <LI><a href="#[f0]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;setPositionFast
-<LI><a href="#[c5]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;setVelocity
+<LI><a href="#[c6]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;setVelocity
 <LI><a href="#[aa]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;setPosition
 <LI><a href="#[a0]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;setCurrentLimit
 </UL>
@@ -1933,7 +1934,7 @@ Global Symbols
 <BR>[Called By]<UL><LI><a href="#[cc]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;BSP_Init
 </UL>
 
-<P><STRONG><a name="[c0]"></a>delay_us</STRONG> (Thumb, 72 bytes, Stack size 0 bytes, delay.o(.text))
+<P><STRONG><a name="[c1]"></a>delay_us</STRONG> (Thumb, 72 bytes, Stack size 0 bytes, delay.o(.text))
 <BR><BR>[Called By]<UL><LI><a href="#[151]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;requestCVPValueFast
 <LI><a href="#[14f]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;setActuatorID
 <LI><a href="#[14e]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;setInverterRecoveryTemperature
@@ -2021,15 +2022,15 @@ Global Symbols
 <LI><a href="#[a0]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;setCurrentLimit
 <LI><a href="#[b1]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;requestCVPValue
 <LI><a href="#[b0]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;isOnline
-<LI><a href="#[c3]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;activateActuatorMode
-<LI><a href="#[bf]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;parse_cmd
+<LI><a href="#[c4]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;activateActuatorMode
+<LI><a href="#[c0]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;parse_cmd
 </UL>
 
 <P><STRONG><a name="[15b]"></a>delay_xms</STRONG> (Thumb, 72 bytes, Stack size 0 bytes, delay.o(.text))
-<BR><BR>[Called By]<UL><LI><a href="#[c2]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;delay_ms
+<BR><BR>[Called By]<UL><LI><a href="#[c3]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;delay_ms
 </UL>
 
-<P><STRONG><a name="[c2]"></a>delay_ms</STRONG> (Thumb, 56 bytes, Stack size 16 bytes, delay.o(.text))
+<P><STRONG><a name="[c3]"></a>delay_ms</STRONG> (Thumb, 56 bytes, Stack size 16 bytes, delay.o(.text))
 <BR><BR>[Stack]<UL><LI>Max Depth = 16<LI>Call Chain = delay_ms
 </UL>
 <BR>[Calls]<UL><LI><a href="#[15b]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;delay_xms
@@ -2038,7 +2039,7 @@ Global Symbols
 <LI><a href="#[ef]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;SCA_Exp1
 <LI><a href="#[ed]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;SCA_Homing
 <LI><a href="#[85]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;main
-<LI><a href="#[bf]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;parse_cmd
+<LI><a href="#[c0]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;parse_cmd
 <LI><a href="#[c8]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;CMD_Handler
 </UL>
 
@@ -2073,19 +2074,19 @@ Global Symbols
 <BR>[Address Reference Count : 1]<UL><LI> startup_stm32f429_439xx.o(RESET)
 </UL>
 <P><STRONG><a name="[162]"></a>USART1_Send</STRONG> (Thumb, 20 bytes, Stack size 0 bytes, usart.o(.text))
-<BR><BR>[Called By]<UL><LI><a href="#[ae]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;USART1_SendStr
+<BR><BR>[Called By]<UL><LI><a href="#[ad]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;USART1_SendStr
 </UL>
 
-<P><STRONG><a name="[ae]"></a>USART1_SendStr</STRONG> (Thumb, 28 bytes, Stack size 4 bytes, usart.o(.text))
+<P><STRONG><a name="[ad]"></a>USART1_SendStr</STRONG> (Thumb, 28 bytes, Stack size 4 bytes, usart.o(.text))
 <BR><BR>[Stack]<UL><LI>Max Depth = 4<LI>Call Chain = USART1_SendStr
 </UL>
 <BR>[Calls]<UL><LI><a href="#[162]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;USART1_Send
 </UL>
-<BR>[Called By]<UL><LI><a href="#[bf]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;parse_cmd
-<LI><a href="#[be]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;return_failed
-<LI><a href="#[bd]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;return_ack
-<LI><a href="#[bc]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;return_data
-<LI><a href="#[ac]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;return_completed
+<BR>[Called By]<UL><LI><a href="#[c0]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;parse_cmd
+<LI><a href="#[bf]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;return_failed
+<LI><a href="#[be]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;return_ack
+<LI><a href="#[bd]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;return_data
+<LI><a href="#[ab]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;return_completed
 </UL>
 
 <P><STRONG><a name="[163]"></a>USART1_Read</STRONG> (Thumb, 32 bytes, Stack size 8 bytes, usart.o(.text), UNUSED)
@@ -2184,7 +2185,7 @@ Global Symbols
 </UL>
 <BR>[Address Reference Count : 1]<UL><LI> startup_stm32f429_439xx.o(RESET)
 </UL>
-<P><STRONG><a name="[2b]"></a>TIM3_IRQHandler</STRONG> (Thumb, 190 bytes, Stack size 32 bytes, timer.o(.text))
+<P><STRONG><a name="[2b]"></a>TIM3_IRQHandler</STRONG> (Thumb, 210 bytes, Stack size 32 bytes, timer.o(.text))
 <BR><BR>[Stack]<UL><LI>Max Depth = 136<LI>Call Chain = TIM3_IRQHandler &rArr; motor_act &rArr; setPosition &rArr; SCA_Write_3 &rArr; canTransmit
 </UL>
 <BR>[Calls]<UL><LI><a href="#[16c]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;TIM_GetITStatus
@@ -2198,7 +2199,7 @@ Global Symbols
 </UL>
 <BR>[Address Reference Count : 1]<UL><LI> startup_stm32f429_439xx.o(RESET)
 </UL>
-<P><STRONG><a name="[2c]"></a>TIM4_IRQHandler</STRONG> (Thumb, 192 bytes, Stack size 32 bytes, timer.o(.text))
+<P><STRONG><a name="[2c]"></a>TIM4_IRQHandler</STRONG> (Thumb, 212 bytes, Stack size 32 bytes, timer.o(.text))
 <BR><BR>[Stack]<UL><LI>Max Depth = 136<LI>Call Chain = TIM4_IRQHandler &rArr; motor_act &rArr; setPosition &rArr; SCA_Write_3 &rArr; canTransmit
 </UL>
 <BR>[Calls]<UL><LI><a href="#[16c]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;TIM_GetITStatus
@@ -2212,21 +2213,21 @@ Global Symbols
 </UL>
 <BR>[Address Reference Count : 1]<UL><LI> startup_stm32f429_439xx.o(RESET)
 </UL>
-<P><STRONG><a name="[44]"></a>TIM6_DAC_IRQHandler</STRONG> (Thumb, 346 bytes, Stack size 24 bytes, timer.o(.text))
+<P><STRONG><a name="[44]"></a>TIM6_DAC_IRQHandler</STRONG> (Thumb, 360 bytes, Stack size 24 bytes, timer.o(.text))
 <BR><BR>[Stack]<UL><LI>Max Depth = 192 + Unknown Stack Size
 <LI>Call Chain = TIM6_DAC_IRQHandler &rArr; return_completed &rArr; CRC_Cal
 </UL>
 <BR>[Calls]<UL><LI><a href="#[16c]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;TIM_GetITStatus
 <LI><a href="#[16d]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;TIM_ClearITPendingBit
 <LI><a href="#[b5]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;TIM_Cmd
-<LI><a href="#[ac]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;return_completed
+<LI><a href="#[ab]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;return_completed
 <LI><a href="#[a2]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__aeabi_f2d
 <LI><a href="#[b2]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__aeabi_cdcmple
 <LI><a href="#[b3]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__2printf
 </UL>
 <BR>[Address Reference Count : 1]<UL><LI> startup_stm32f429_439xx.o(RESET)
 </UL>
-<P><STRONG><a name="[3a]"></a>TIM8_UP_TIM13_IRQHandler</STRONG> (Thumb, 194 bytes, Stack size 32 bytes, timer.o(.text))
+<P><STRONG><a name="[3a]"></a>TIM8_UP_TIM13_IRQHandler</STRONG> (Thumb, 212 bytes, Stack size 32 bytes, timer.o(.text))
 <BR><BR>[Stack]<UL><LI>Max Depth = 136<LI>Call Chain = TIM8_UP_TIM13_IRQHandler &rArr; motor_act &rArr; setPosition &rArr; SCA_Write_3 &rArr; canTransmit
 </UL>
 <BR>[Calls]<UL><LI><a href="#[16c]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;TIM_GetITStatus
@@ -2240,7 +2241,7 @@ Global Symbols
 </UL>
 <BR>[Address Reference Count : 1]<UL><LI> startup_stm32f429_439xx.o(RESET)
 </UL>
-<P><STRONG><a name="[3b]"></a>TIM8_TRG_COM_TIM14_IRQHandler</STRONG> (Thumb, 192 bytes, Stack size 32 bytes, timer.o(.text))
+<P><STRONG><a name="[3b]"></a>TIM8_TRG_COM_TIM14_IRQHandler</STRONG> (Thumb, 212 bytes, Stack size 32 bytes, timer.o(.text))
 <BR><BR>[Stack]<UL><LI>Max Depth = 136<LI>Call Chain = TIM8_TRG_COM_TIM14_IRQHandler &rArr; motor_act &rArr; setPosition &rArr; SCA_Write_3 &rArr; canTransmit
 </UL>
 <BR>[Calls]<UL><LI><a href="#[16c]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;TIM_GetITStatus
@@ -2937,7 +2938,7 @@ Global Symbols
 <LI><a href="#[2b]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;TIM3_IRQHandler
 <LI><a href="#[ce]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;TIM2_init
 <LI><a href="#[85]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;main
-<LI><a href="#[bf]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;parse_cmd
+<LI><a href="#[c0]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;parse_cmd
 <LI><a href="#[b4]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;motor_act_position
 </UL>
 
@@ -3177,10 +3178,10 @@ Global Symbols
 <BR>[Called By]<UL><LI><a href="#[44]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;TIM6_DAC_IRQHandler
 <LI><a href="#[2a]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;TIM2_IRQHandler
 <LI><a href="#[ea]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;lookupActuators
-<LI><a href="#[c1]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;enableActuator
+<LI><a href="#[c2]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;enableActuator
 <LI><a href="#[85]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;main
-<LI><a href="#[bf]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;parse_cmd
-<LI><a href="#[bc]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;return_data
+<LI><a href="#[c0]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;parse_cmd
+<LI><a href="#[bd]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;return_data
 <LI><a href="#[b7]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;calculate_inverse
 <LI><a href="#[af]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;update_status
 <LI><a href="#[c8]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;CMD_Handler
@@ -3227,13 +3228,13 @@ Global Symbols
 
 <P><STRONG><a name="[298]"></a>_memcpy_lastbytes_aligned</STRONG> (Thumb, 0 bytes, Stack size unknown bytes, rt_memcpy_w.o(.text), UNUSED)
 
-<P><STRONG><a name="[ad]"></a>__aeabi_memclr4</STRONG> (Thumb, 0 bytes, Stack size 4 bytes, rt_memclr_w.o(.text))
+<P><STRONG><a name="[ac]"></a>__aeabi_memclr4</STRONG> (Thumb, 0 bytes, Stack size 4 bytes, rt_memclr_w.o(.text))
 <BR><BR>[Stack]<UL><LI>Max Depth = 4<LI>Call Chain = __aeabi_memclr4
 </UL>
 <BR>[Called By]<UL><LI><a href="#[f5]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;resetController
-<LI><a href="#[be]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;return_failed
-<LI><a href="#[bc]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;return_data
-<LI><a href="#[ac]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;return_completed
+<LI><a href="#[bf]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;return_failed
+<LI><a href="#[bd]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;return_data
+<LI><a href="#[ab]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;return_completed
 </UL>
 
 <P><STRONG><a name="[299]"></a>__aeabi_memclr8</STRONG> (Thumb, 0 bytes, Stack size 4 bytes, rt_memclr_w.o(.text), UNUSED)
@@ -3533,7 +3534,7 @@ Global Symbols
 <LI><a href="#[1b2]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__aeabi_i2d
 <LI><a href="#[a6]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__aeabi_dsub
 <LI><a href="#[1b3]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__aeabi_drsub
-<LI><a href="#[c6]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__aeabi_dadd
+<LI><a href="#[bc]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__aeabi_dadd
 <LI><a href="#[1b0]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;fabs
 <LI><a href="#[1b1]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__aeabi_d2iz
 <LI><a href="#[1ae]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__aeabi_dneg
@@ -3557,7 +3558,7 @@ Global Symbols
 <BR><BR>[Stack]<UL><LI>Max Depth = 56<LI>Call Chain = __kernel_poly &rArr; __aeabi_dmul
 </UL>
 <BR>[Calls]<UL><LI><a href="#[a5]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__aeabi_dmul
-<LI><a href="#[c6]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__aeabi_dadd
+<LI><a href="#[bc]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__aeabi_dadd
 </UL>
 <BR>[Called By]<UL><LI><a href="#[1af]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__kernel_sin
 <LI><a href="#[1ad]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__kernel_cos
@@ -3569,7 +3570,7 @@ Global Symbols
 <BR>[Calls]<UL><LI><a href="#[a5]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__aeabi_dmul
 <LI><a href="#[a6]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__aeabi_dsub
 <LI><a href="#[1b3]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__aeabi_drsub
-<LI><a href="#[c6]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__aeabi_dadd
+<LI><a href="#[bc]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__aeabi_dadd
 <LI><a href="#[1b4]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__kernel_poly
 <LI><a href="#[198]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__ARM_fpclassify
 <LI><a href="#[1b5]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__mathlib_dbl_underflow
@@ -3580,7 +3581,7 @@ Global Symbols
 <P><STRONG><a name="[1ab]"></a>__mathlib_dbl_infnan</STRONG> (Thumb, 20 bytes, Stack size 8 bytes, dunder.o(i.__mathlib_dbl_infnan))
 <BR><BR>[Stack]<UL><LI>Max Depth = 24<LI>Call Chain = __mathlib_dbl_infnan &rArr; __aeabi_dadd
 </UL>
-<BR>[Calls]<UL><LI><a href="#[c6]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__aeabi_dadd
+<BR>[Calls]<UL><LI><a href="#[bc]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__aeabi_dadd
 </UL>
 <BR>[Called By]<UL><LI><a href="#[a4]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__hardfp_sin
 </UL>
@@ -3669,7 +3670,7 @@ Global Symbols
 <BR><BR>[Stack]<UL><LI>Max Depth = 32<LI>Call Chain = __aeabi_d2f
 </UL>
 <BR>[Called By]<UL><LI><a href="#[85]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;main
-<LI><a href="#[bf]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;parse_cmd
+<LI><a href="#[c0]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;parse_cmd
 <LI><a href="#[b7]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;calculate_inverse
 <LI><a href="#[a1]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;calculate_position_xyz
 <LI><a href="#[c8]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;CMD_Handler
@@ -3680,11 +3681,12 @@ Global Symbols
 <LI><a href="#[1b9]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__fpl_dnaninf
 </UL>
 
-<P><STRONG><a name="[c6]"></a>__aeabi_dadd</STRONG> (Thumb, 0 bytes, Stack size 16 bytes, daddsub_clz.o(x$fpl$dadd))
+<P><STRONG><a name="[bc]"></a>__aeabi_dadd</STRONG> (Thumb, 0 bytes, Stack size 16 bytes, daddsub_clz.o(x$fpl$dadd))
 <BR><BR>[Stack]<UL><LI>Max Depth = 16<LI>Call Chain = __aeabi_dadd
 </UL>
 <BR>[Called By]<UL><LI><a href="#[85]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;main
-<LI><a href="#[bf]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;parse_cmd
+<LI><a href="#[c0]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;parse_cmd
+<LI><a href="#[b7]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;calculate_inverse
 <LI><a href="#[1b4]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__kernel_poly
 <LI><a href="#[1af]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__kernel_sin
 <LI><a href="#[1ac]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__ieee754_rem_pio2
@@ -3744,7 +3746,7 @@ Global Symbols
 </UL>
 <BR>[Called By]<UL><LI><a href="#[44]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;TIM6_DAC_IRQHandler
 <LI><a href="#[85]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;main
-<LI><a href="#[bf]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;parse_cmd
+<LI><a href="#[c0]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;parse_cmd
 <LI><a href="#[b7]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;calculate_inverse
 <LI><a href="#[af]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;update_status
 <LI><a href="#[c8]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;CMD_Handler
@@ -3824,7 +3826,7 @@ Global Symbols
 <P><STRONG><a name="[a6]"></a>__aeabi_dsub</STRONG> (Thumb, 0 bytes, Stack size 32 bytes, daddsub_clz.o(x$fpl$dsub))
 <BR><BR>[Stack]<UL><LI>Max Depth = 32<LI>Call Chain = __aeabi_dsub
 </UL>
-<BR>[Called By]<UL><LI><a href="#[bf]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;parse_cmd
+<BR>[Called By]<UL><LI><a href="#[c0]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;parse_cmd
 <LI><a href="#[a1]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;calculate_position_xyz
 <LI><a href="#[1af]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__kernel_sin
 <LI><a href="#[1ac]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__ieee754_rem_pio2
@@ -3845,7 +3847,7 @@ Global Symbols
 <LI><a href="#[2c]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;TIM4_IRQHandler
 <LI><a href="#[2b]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;TIM3_IRQHandler
 <LI><a href="#[85]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;main
-<LI><a href="#[bf]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;parse_cmd
+<LI><a href="#[c0]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;parse_cmd
 <LI><a href="#[b7]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;calculate_inverse
 <LI><a href="#[af]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;update_status
 <LI><a href="#[a1]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;calculate_position_xyz
@@ -3894,20 +3896,20 @@ Local Symbols
 <LI><a href="#[c8]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;CMD_Handler
 </UL>
 
-<P><STRONG><a name="[c8]"></a>CMD_Handler</STRONG> (Thumb, 13220 bytes, Stack size 128 bytes, main.o(.text))
-<BR><BR>[Stack]<UL><LI>Max Depth = 672 + Unknown Stack Size
-<LI>Call Chain = CMD_Handler &rArr; SCA_Lookup &rArr; lookupActuators &rArr; __2printf &rArr; _printf_char_file &rArr; _printf_char_common &rArr; __printf
+<P><STRONG><a name="[c8]"></a>CMD_Handler</STRONG> (Thumb, 13268 bytes, Stack size 128 bytes, main.o(.text))
+<BR><BR>[Stack]<UL><LI>Max Depth = 720 + Unknown Stack Size
+<LI>Call Chain = CMD_Handler &rArr; calculate_inverse &rArr; calculate_position_xyz &rArr; __hardfp_sin &rArr; __ieee754_rem_pio2 &rArr; __aeabi_dmul
 </UL>
 <BR>[Calls]<UL><LI><a href="#[cb]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;disableAllActuators
-<LI><a href="#[c2]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;delay_ms
-<LI><a href="#[c3]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;activateActuatorMode
+<LI><a href="#[c3]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;delay_ms
+<LI><a href="#[c4]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;activateActuatorMode
 <LI><a href="#[c9]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;SCA_Lookup
 <LI><a href="#[ca]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;SCA_Init
-<LI><a href="#[be]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;return_failed
+<LI><a href="#[bf]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;return_failed
 <LI><a href="#[b7]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;calculate_inverse
 <LI><a href="#[b6]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;angle_act_position
 <LI><a href="#[b4]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;motor_act_position
-<LI><a href="#[ab]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;position_2_angle
+<LI><a href="#[ae]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;position_2_angle
 <LI><a href="#[a8]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;motor_act
 <LI><a href="#[a1]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;calculate_position_xyz
 <LI><a href="#[c7]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;Log

@@ -32,6 +32,11 @@ unsigned int tim6_counter = 0;
 unsigned int tim13_counter = 0;
 unsigned int tim14_counter = 0;
 
+unsigned int tim3pre = 0;
+unsigned int tim4pre = 0;
+unsigned int tim13pre = 0;
+unsigned int tim14pre = 0;
+
 //rotation matrix
 float r1_0[3][3];
 float r2_0[3][3];
@@ -72,6 +77,8 @@ u8 work_model = 0;
 /* Forward Declaration -----------------------------------------------------------*/
 static void Log(void);
 static void CMD_Handler(uint8_t cmd);
+
+ITS its_value[100];
 
 u8 cmd1_p(CMD_STRUCT input)
 {
@@ -442,6 +449,22 @@ char update_status(void)
 			t4 = __fabs(t4) < 0.01 ? 0 : t4;
 			calculate_position_xyz(t1, t2, t3, t4, &current_position.x, &current_position.y, &current_position.z);
 		}
+
+		//judge stop
+		if (work_model == 1)
+		{
+			if (tim3_counter == 0 && tim4_counter == 0 && tim13_counter == 0 && tim14_counter == 0)
+			{
+				if (tim4pre == 1 || tim3pre == 1 || tim13pre == 1 || tim14pre == 1)
+				{
+					tim14pre = 0;
+					tim13pre = 0;
+					tim3pre = 0;
+					tim4pre = 0;
+					return_completed();
+				}
+			}
+		}
 	}
 	return 0;
 }
@@ -691,155 +714,82 @@ char calculate_inverse(float x4, float y4, float z4, float *t1, float *t2, float
 			//confirm position
 			float cx, cy, cz;
 			calculate_position_xyz(*t1, *t2, *t3, *t4, &cx, &cy, &cz);
-			u8 re_counter = 0;
-			while (__fabs(cx - x4) > 0.2 || __fabs(cy - y4) > 0.2 || __fabs(cz - z4) > 0.2)
+			float tpa = sqrtf(x4 * x4 + y4 * y4 - tmp_b * tmp_b);
+			u8 its_counter = 0;
+			for (i = 1; i < 5; i++)
 			{
-				if (re_counter > 3)
-				{
-					cmd_s.px = current_position.x;
-					cmd_s.py = current_position.y;
-					cmd_s.pz = current_position.z;
-					return 8;
-				}
-				t1_sin_value = (tmp_a * y4 - tmp_b * x4) / (x4 * x4 + y4 * y4);
-				if (__fabs(t1_sin_value) > 1)
-				{
-					return 2;
-				}
-				//calculate the theta 1 when tmp_a > 0
-				t1_tmp = asinf(t1_sin_value);
-				t1_array[1] = R2A(t1_tmp) > 180 ? t1_tmp - 360 : R2A(t1_tmp);
-				t1_array[2] = (180 - R2A(t1_tmp)) > 180 ? 180 - R2A(t1_tmp) - 360 : 180 - R2A(t1_tmp);
-				//printf("tmp t1 1 2 is       %f      %f\n", t1_array[1], t1_array[2]);
+				float tmp_t1 = t1_array[i];
 
-				//calculate the theta1 when a < 0
-				tmp_a = -tmp_a;
-				t1_sin_value = (tmp_a * y4 - tmp_b * x4) / (x4 * x4 + y4 * y4);
-				t1_tmp = asinf(t1_sin_value);
-				t1_array[3] = R2A(t1_tmp) > 180 ? t1_tmp - 360 : R2A(t1_tmp);
-				t1_array[4] = (180 - R2A(t1_tmp)) > 180 ? 180 - R2A(t1_tmp) - 360 : 180 - R2A(t1_tmp);
-				//printf("tmp t1    %f      %f    %f    %f\n", t1_array[1], t1_array[2], t1_array[3], t1_array[4]);
-				//find the nearest one to t1a
-				i = 1;
-				index = 1;
-				tmpt1_f = 370;
-				for (i = 1; i < 5; i++)
+				if (i == 3 || i == 4)
 				{
-					if (__fabs(ct1 - t1_array[i]) < tmpt1_f)
+					tpa = -tpa;
+				}
+
+				u8 kt3 = 0;
+				for (kt3 = 1; kt3 < 3; kt3++)
+				{
+					float tmp_t3 = t3_array[kt3];
+					mod = sqrtf(L3 * L3 + L2 * L2 + 2 * L2 * L3 * cosf(A2R(tmp_t3)));
+					tmpt2 = acosf(tmp_a / mod);
+					tmpt2_0 = acosf((L3 * cosf(A2R(tmp_t3)) + L2) / mod);
+
+					t2_array[1] = R2A((tmpt2 - tmpt2_0) > Pi ? (tmpt2 - tmpt2_0) - 2 * Pi : (tmpt2 - tmpt2_0));
+					t2_array[2] = R2A((tmpt2 + tmpt2_0) > Pi ? (tmpt2 + tmpt2_0) - 2 * Pi : (tmpt2 + tmpt2_0));
+					t2_array[3] = R2A((-tmpt2 - tmpt2_0) > Pi ? (-tmpt2 - tmpt2_0) - 2 * Pi : (-tmpt2 - tmpt2_0));
+					t2_array[4] = R2A((-tmpt2 + tmpt2_0) > Pi ? (-tmpt2 + tmpt2_0) - 2 * Pi : (-tmpt2 + tmpt2_0));
+
+					u8 kt2 = 0;
+					for (kt2 = 1; kt2 < 5; kt2++)
 					{
+						float tmp_t2 = t2_array[kt2];
+						t4_array[1] = 0 - tmp_t2 - tmp_t3;
+						t4_array[2] = 180 - tmp_t2 - tmp_t3;
+						t4_array[3] = 360 - tmp_t2 - tmp_t3;
 
-						if ((choose_flag[1] & (1 << i)) == 0)
+						u8 kt4 = 1;
+						for (kt4 = 1; kt4 < 4; kt4++)
 						{
-							index = i;
-							tmpt1_f = __fabs(ct1 - t1_array[i]);
+							float tmpt4 = t4_array[kt4];
+							calculate_position_xyz(tmp_t1, tmp_t2, tmp_t3, tmpt4, &cx, &cy, &cz);
+							if (__fabs(cx - x4) < 0.2 && __fabs(cy - y4) < 0.2 && __fabs(cz - z4) < 0.2)
+							{
+								its_value[its_counter].t1 = tmp_t1;
+								its_value[its_counter].t2 = tmp_t2;
+								its_value[its_counter].t3 = tmp_t3;
+								its_value[its_counter].t4 = tmpt4;
+								its_counter++;
+							}
 						}
 					}
 				}
-				_t1 = t1_array[index];
-				if (x4 * x4 + y4 * y4 - tmp_b * tmp_b < 0)
-				{
-					return 3;
-				}
-				if (index == 1 || index == 2)
-				{
-					//a_dir = 1;
-					tmp_a = sqrtf(x4 * x4 + y4 * y4 - tmp_b * tmp_b);
-				}
-				else
-				{
-					//a_dir = -1;
-					tmp_a = -sqrtf(x4 * x4 + y4 * y4 - tmp_b * tmp_b);
-				}
-				//printf("theta 1       %f\n", _t1);
-				choose_flag[1] |= (1 << index);
-				*t1 = _t1;
+			}
 
-				if (__fabs((x4 * x4 + y4 * y4 + z4 * z4 - tmp_b * tmp_b - L2 * L2 - L3 * L3) / 2 / L2 / L3) > 1)
+			if (its_counter > 0)
+			{
+				u8 tkc = 0;
+				ITS tpits;
+				tpits.t1 = 1000;
+				tpits.t2 = 1000;
+				tpits.t3 = 1000;
+				tpits.t4 = 1000;
+				for (tkc = 0; tkc < its_counter; tkc++)
 				{
-					return 4;
-				}
-				_t3 = acosf((x4 * x4 + y4 * y4 + z4 * z4 - tmp_b * tmp_b - L2 * L2 - L3 * L3) / 2 / L2 / L3);
-				t3_array[1] = R2A(_t3);
-				t3_array[2] = 180 + R2A(_t3) > 180 ? -R2A(_t3) : 180 + R2A(_t3);
-				//printf("theta 3   %f, %f\n", t3_array[1], t3_array[2]);
-
-				//find the nearest
-				i = 1;
-				index = 1;
-				tmpt1_f = 370;
-				for (i = 1; i < 3; i++)
-				{
-					if (__fabs(ct3 - t1_array[i]) < tmpt1_f)
+					if (__fabs(ct1 - its_value[tkc].t1) + __fabs(ct2 - its_value[tkc].t2) + __fabs(ct3 - its_value[tkc].t3) + __fabs(ct4 - its_value[tkc].t4) < __fabs(ct1 - tpits.t1) + __fabs(ct2 - tpits.t2) + __fabs(ct3 - tpits.t3) + __fabs(ct4 - tpits.t4))
 					{
-
-						if ((choose_flag[3] & (1 << i)) == 0)
-						{
-							index = i;
-							tmpt1_f = __fabs(ct3 - t1_array[i]);
-						}
+						tpits.t1 = its_value[tkc].t1;
+						tpits.t2 = its_value[tkc].t2;
+						tpits.t3 = its_value[tkc].t3;
+						tpits.t4 = its_value[tkc].t4;
 					}
 				}
-				choose_flag[3] |= (1 << i);
-
-				//printf("theta 3       %f\n", _t3);
-				*t3 = _t3;
-
-				mod = sqrtf(L3 * L3 + L2 * L2 + 2 * L2 * L3 * cosf(A2R(_t3)));
-
-				if (__fabs(tmp_a / mod) > 1 || __fabs((L3 * cosf(A2R(_t3)) + L2) / mod) > 1)
-				{
-					return 5;
-				}
-				tmpt2 = acosf(tmp_a / mod);
-				tmpt2_0 = acosf((L3 * cosf(A2R(_t3)) + L2) / mod);
-
-				t2_array[1] = (tmpt2 - tmpt2_0) > Pi ? (tmpt2 - tmpt2_0) - 2 * Pi : (tmpt2 - tmpt2_0);
-				t2_array[2] = (tmpt2 + tmpt2_0) > Pi ? (tmpt2 + tmpt2_0) - 2 * Pi : (tmpt2 + tmpt2_0);
-				t2_array[3] = (-tmpt2 - tmpt2_0) > Pi ? (-tmpt2 - tmpt2_0) - 2 * Pi : (-tmpt2 - tmpt2_0);
-				t2_array[4] = (-tmpt2 + tmpt2_0) > Pi ? (-tmpt2 + tmpt2_0) - 2 * Pi : (-tmpt2 + tmpt2_0);
-
-				//printf("t2 %f,   %f   %f   %f\n", R2A(t2_array[1]), R2A(t2_array[2]), R2A(t2_array[3]), R2A(t2_array[4]));
-				//find the nearest
-				tmp_t2f = 370;
-				for (i = 1; i < 5; i++)
-				{
-					if (__fabs(ct2 - R2A(t2_array[i])) < tmp_t2f)
-					{
-						if ((choose_flag[2] & (1 << i)) == 0)
-						{
-							index = i;
-							tmp_t2f = __fabs(ct2 - R2A(t2_array[i]));
-						}
-					}
-				}
-				choose_flag[2] |= (1 << index);
-				//printf("t2 is   %f\n", R2A(t2_array[index]));
-				*t2 = R2A(t2_array[index]);
-
-				//calculate theta 4
-				t4_array[1] = 0 - *t2 - *t3;
-				t4_array[2] = 180 - *t2 - *t3;
-				t4_array[3] = 360 - *t2 - *t3;
-				t4_array[3] = t4angle - *t2 - *t3;
-				//find the nearest
-				tmp_t4f = 370;
-				for (i = 1; i < 4; i++)
-				{
-					if (__fabs(ct4 - t4_array[i]) < tmp_t4f)
-					{
-						if ((choose_flag[4] & (1 << i)) == 0)
-						{
-
-							index = i;
-							tmp_t4f = __fabs(ct4 - t4_array[i]);
-						}
-					}
-				}
-				//printf("t4 is   %f\n", t4_array[index]);
-				*t4 = t4_array[index];
-				choose_flag[4] |= (1 << index);
-				calculate_position_xyz(*t1, *t2, *t3, *t4, &cx, &cy, &cz);
-				re_counter++;
+				*t1 = tpits.t1;
+				*t2 = tpits.t2;
+				*t3 = tpits.t3;
+				*t4 = tpits.t4;
+			}
+			else
+			{
+				return 8;
 			}
 		}
 	}
