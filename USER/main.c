@@ -276,10 +276,10 @@ void motor_parameter_init(void)
 	porg_4_3[2][0] = D3;
 
 	//init offset
-	mp[1].zero_offset = -0.3167;
-	mp[2].zero_offset = 15.8464;
-	mp[3].zero_offset = 33.8108;
-	mp[4].zero_offset = -2.2222;
+	mp[1].zero_offset = -0.3857;//-0.3167;
+	mp[2].zero_offset = 28.9834;//15.8464;
+	mp[3].zero_offset = 32.6340;//33.8108;
+	mp[4].zero_offset = 7.6800;//-2.2222;
 
 	//init angle dir
 	mp[1].angle_dir = -1;
@@ -716,6 +716,10 @@ char calculate_inverse(float x4, float y4, float z4, float *t1, float *t2, float
 			calculate_position_xyz(*t1, *t2, *t3, *t4, &cx, &cy, &cz);
 			float tpa = sqrtf(x4 * x4 + y4 * y4 - tmp_b * tmp_b);
 			u8 its_counter = 0;
+			t2_array[1] = R2A(t2_array[1]);
+			t2_array[2] = R2A(t2_array[2]);
+			t2_array[3] = R2A(t2_array[3]);
+			t2_array[4] = R2A(t2_array[4]);
 			for (i = 1; i < 5; i++)
 			{
 				float tmp_t1 = t1_array[i];
@@ -733,10 +737,7 @@ char calculate_inverse(float x4, float y4, float z4, float *t1, float *t2, float
 					tmpt2 = acosf(tmp_a / mod);
 					tmpt2_0 = acosf((L3 * cosf(A2R(tmp_t3)) + L2) / mod);
 
-					t2_array[1] = R2A((tmpt2 - tmpt2_0) > Pi ? (tmpt2 - tmpt2_0) - 2 * Pi : (tmpt2 - tmpt2_0));
-					t2_array[2] = R2A((tmpt2 + tmpt2_0) > Pi ? (tmpt2 + tmpt2_0) - 2 * Pi : (tmpt2 + tmpt2_0));
-					t2_array[3] = R2A((-tmpt2 - tmpt2_0) > Pi ? (-tmpt2 - tmpt2_0) - 2 * Pi : (-tmpt2 - tmpt2_0));
-					t2_array[4] = R2A((-tmpt2 + tmpt2_0) > Pi ? (-tmpt2 + tmpt2_0) - 2 * Pi : (-tmpt2 + tmpt2_0));
+					
 
 					u8 kt2 = 0;
 					for (kt2 = 1; kt2 < 5; kt2++)
@@ -1254,8 +1255,9 @@ u8 parse_cmd(CMD_STRUCT *command)
 		cmd_s.cmd_index = ((u16)tmp_buffer[2] << 8) | ((u16)tmp_buffer[2]);
 		cmd_s.function_code = tmp_buffer[4];
 		if ((cmd_s.function_code >= 1 && cmd_s.function_code <= 4) || (cmd_s.function_code == 10) ||
-			(cmd_s.function_code == 11) || (cmd_s.function_code == 12) || (cmd_s.function_code == 13))
+			(cmd_s.function_code == 11) || (cmd_s.function_code == 12) || (cmd_s.function_code == 13)|| (cmd_s.function_code == 14))
 		{
+			work_model=0;
 			printf("control frame, function code  %d\n", cmd_s.function_code);
 			cmd_s.cmd_type = 3;
 			cmd_s.target_motor = 0;
@@ -1326,6 +1328,11 @@ u8 parse_cmd(CMD_STRUCT *command)
 							setVelocity(tk + 1, 0);
 							activateActuatorMode(tk + 1, SCA_Profile_Position_Mode, Block);
 							TIM_Cmd(TIM6, DISABLE);
+							TIM_Cmd(TIM3,DISABLE);
+							TIM_Cmd(TIM4,DISABLE);
+							TIM_Cmd(TIM13,DISABLE);
+							TIM_Cmd(TIM14,DISABLE);
+							
 							cmd_s.px = current_position.x;
 							cmd_s.py = current_position.y;
 							cmd_s.pz = current_position.z;
@@ -1529,6 +1536,37 @@ u8 parse_cmd(CMD_STRUCT *command)
 				{
 					update_next_pos_flag = 1;
 				}
+				return_ack(cmd_s.cmd_type);
+				break;
+			}
+			case 14:
+			{
+				printf("cmd14, abs position cmd\n");
+				float a1, a2, a3, a4;
+				position_2_angle(&a1, &a2, &a3, &a4);
+				t4angle = a2 + a3 + a4;
+				TIM_Cmd(TIM6, DISABLE);
+				int32_t tprx = (((int32_t)tmp_buffer[5]) << 24) | (((int32_t)tmp_buffer[6]) << 16) | (((int32_t)tmp_buffer[7]) << 8) | (((int32_t)tmp_buffer[8]));
+				int32_t tpry = (((int32_t)tmp_buffer[9]) << 24) | (((int32_t)tmp_buffer[10]) << 16) | (((int32_t)tmp_buffer[11]) << 8) | (((int32_t)tmp_buffer[12]));
+				int32_t tprz = (((int32_t)tmp_buffer[13]) << 24) | (((int32_t)tmp_buffer[14]) << 16) | (((int32_t)tmp_buffer[15]) << 8) | (((int32_t)tmp_buffer[16]));
+				int32_t tppx = (((int32_t)tmp_buffer[17]) << 24) | (((int32_t)tmp_buffer[18]) << 16) | (((int32_t)tmp_buffer[19]) << 8) | (((int32_t)tmp_buffer[20]));
+				int32_t tppy = (((int32_t)tmp_buffer[21]) << 24) | (((int32_t)tmp_buffer[22]) << 16) | (((int32_t)tmp_buffer[23]) << 8) | (((int32_t)tmp_buffer[24]));
+				int32_t tppz = (((int32_t)tmp_buffer[25]) << 24) | (((int32_t)tmp_buffer[26]) << 16) | (((int32_t)tmp_buffer[27]) << 8) | (((int32_t)tmp_buffer[28]));
+				float frx = (float)tprx / 10000;
+				float fry = (float)tpry / 10000;
+				float frz = (float)tprz / 10000;
+				float fpx = (float)tppx / 100;
+				float fpy = (float)tppy / 100;
+				float fpz = (float)tppz / 100;
+				cmd_s.px = fpx;
+				cmd_s.py = fpy;
+				cmd_s.pz = fpz;
+				cmd_s.rx = frx;
+				cmd_s.ry = fry;
+				cmd_s.rz = frz;
+				printf("%f, %f, %f, %f, %f, %f\n", frx, fry, frz, fpx, fpy, fpz);
+				work_model=1;
+				update_next_pos_flag = 1;
 				return_ack(cmd_s.cmd_type);
 				break;
 			}
