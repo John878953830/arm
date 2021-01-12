@@ -74,6 +74,8 @@ volatile STEP_STRUCT step_value;
 volatile u8 update_next_pos_flag = 0;
 volatile STEP_SPEED_STRUCT step_speed_value;
 u8 work_model = 0;
+uint16_t error_code_period_counter=0;
+uint16_t volt_period_counter=0;
 /* Forward Declaration -----------------------------------------------------------*/
 static void Log(void);
 static void CMD_Handler(uint8_t cmd);
@@ -277,8 +279,8 @@ void motor_parameter_init(void)
 
 	//init offset
 	mp[1].zero_offset = -0.3857;//-0.3167;
-	mp[2].zero_offset = 28.9834;//15.8464;
-	mp[3].zero_offset = 32.6340;//33.8108;
+	mp[2].zero_offset = 28.00;//15.8464;
+	mp[3].zero_offset = 32.6544;//33.8108;
 	mp[4].zero_offset = 7.6800;//-2.2222;
 
 	//init angle dir
@@ -342,6 +344,10 @@ char motor_act(size_t id, float step, char dir)
 	SCA_Handler_t *pSCA = NULL;
 	mp[id].id = id;
 	mp[id].step = step;
+	if(mp[id].step>10)
+	{
+		mp[id].step=9;
+	}
 	//check system status
 	if (if_error != 0)
 	{
@@ -389,6 +395,8 @@ char update_status(void)
 	if (timeout_flag)
 	{
 		timeout_flag = 0;
+		error_code_period_counter++;
+		volt_period_counter++;
 
 		//check id if online
 		for (i = 1; i < 5; i++)
@@ -415,6 +423,44 @@ char update_status(void)
 				return 20 + i;
 			}
 		}
+		
+		//get error code
+		if(error_code_period_counter>10)
+		{
+			error_code_period_counter=0;
+			for (i = 1; i < 5; i++)
+			{
+				//if (getPosition(i, Unblock) == SCA_NoError)
+				if (getErrorCode(i,Unblock) == SCA_NoError) //new function, untested
+				{
+					continue;
+				}
+				else
+				{
+					return 40 + i;
+				}
+			}
+		}
+		
+		//get volt
+		if(volt_period_counter>100)
+		{
+			volt_period_counter=0;
+			for (i = 1; i < 5; i++)
+			{
+				//if (getPosition(i, Unblock) == SCA_NoError)
+				if (getVoltage(i,Unblock) == SCA_NoError) //new function, untested
+				{
+					continue;
+				}
+				else
+				{
+					return 40 + i;
+				}
+			}
+		}
+		
+		
 		//check if complete single position cmd
 		u8 kk = 1;
 		for (kk = 1; kk < 5; kk++)
@@ -477,6 +523,11 @@ char motor_act_position(size_t id, float speed, float position)
 	{
 		mp[id].id = id;
 		mp[id].speed = speed;
+		if(mp[id].speed<1)
+		{
+			mp[id].speed=1;
+		}
+			
 		mp[id].step = mp[id].speed / 1000; //0.1; //__fabs(pSCA->Position_Real - position)/1000;
 		mp[id].target = position;
 		switch (id)
@@ -586,7 +637,7 @@ char calculate_inverse(float x4, float y4, float z4, float *t1, float *t2, float
 		//int a_dir = 0;
 		float tmp_a = sqrtf(x4 * x4 + y4 * y4 - tmp_b * tmp_b);
 
-		float t1_array[5];
+		float t1_array[10];
 		float t1_sin_value = (tmp_a * y4 - tmp_b * x4) / (x4 * x4 + y4 * y4);
 		if (__fabs(t1_sin_value) > 1)
 		{
@@ -635,7 +686,7 @@ char calculate_inverse(float x4, float y4, float z4, float *t1, float *t2, float
 		//printf("theta 1       %f\n", _t1);
 		*t1 = _t1;
 
-		float t3_array[3];
+		float t3_array[10];
 		if (__fabs((x4 * x4 + y4 * y4 + z4 * z4 - tmp_b * tmp_b - L2 * L2 - L3 * L3) / 2 / L2 / L3) > 1)
 		{
 			return 4;
@@ -661,7 +712,7 @@ char calculate_inverse(float x4, float y4, float z4, float *t1, float *t2, float
 
 		float mod = sqrtf(L3 * L3 + L2 * L2 + 2 * L2 * L3 * cosf(A2R(_t3)));
 
-		float t2_array[5];
+		float t2_array[10];
 		if (__fabs(tmp_a / mod) > 1 || __fabs((L3 * cosf(A2R(_t3)) + L2) / mod) > 1)
 		{
 			return 5;
@@ -720,6 +771,10 @@ char calculate_inverse(float x4, float y4, float z4, float *t1, float *t2, float
 			t2_array[2] = R2A(t2_array[2]);
 			t2_array[3] = R2A(t2_array[3]);
 			t2_array[4] = R2A(t2_array[4]);
+			t2_array[5]=t2_array[1]>0?180.0-(double)t2_array[1]:__fabs(t2_array[1])-180.0;
+			t2_array[6]=t2_array[2]>0?180.0-(double)t2_array[2]:__fabs(t2_array[2])-180.0;
+			t2_array[7]=t2_array[3]>0?180.0-(double)t2_array[3]:__fabs(t2_array[3])-180.0;
+			t2_array[8]=t2_array[4]>0?180.0-(double)t2_array[4]:__fabs(t2_array[4])-180.0;
 			for (i = 1; i < 5; i++)
 			{
 				float tmp_t1 = t1_array[i];
@@ -740,7 +795,7 @@ char calculate_inverse(float x4, float y4, float z4, float *t1, float *t2, float
 					
 
 					u8 kt2 = 0;
-					for (kt2 = 1; kt2 < 5; kt2++)
+					for (kt2 = 1; kt2 < 9; kt2++)
 					{
 						float tmp_t2 = t2_array[kt2];
 						t4_array[1] = 0 - tmp_t2 - tmp_t3;
@@ -775,7 +830,7 @@ char calculate_inverse(float x4, float y4, float z4, float *t1, float *t2, float
 				tpits.t4 = 1000;
 				for (tkc = 0; tkc < its_counter; tkc++)
 				{
-					if (__fabs(ct1 - its_value[tkc].t1) + __fabs(ct2 - its_value[tkc].t2) + __fabs(ct3 - its_value[tkc].t3) + __fabs(ct4 - its_value[tkc].t4) < __fabs(ct1 - tpits.t1) + __fabs(ct2 - tpits.t2) + __fabs(ct3 - tpits.t3) + __fabs(ct4 - tpits.t4))
+					if (__fabs(ct1 - its_value[tkc].t1) + __fabs(ct2 - its_value[tkc].t2)+ __fabs(ct3 - its_value[tkc].t3)< __fabs(ct1 - tpits.t1) + __fabs(ct2 - tpits.t2)+__fabs(ct3 - tpits.t3))
 					{
 						tpits.t1 = its_value[tkc].t1;
 						tpits.t2 = its_value[tkc].t2;
@@ -786,7 +841,7 @@ char calculate_inverse(float x4, float y4, float z4, float *t1, float *t2, float
 				*t1 = tpits.t1;
 				*t2 = tpits.t2;
 				*t3 = tpits.t3;
-				*t4 = tpits.t4;
+				*t4 = t4angle - *t2 - *t3;;
 			}
 			else
 			{
@@ -1242,7 +1297,7 @@ u8 parse_cmd(CMD_STRUCT *command)
 		}
 		//crc
 		u32 crc_res = CRC_Cal(tmp_buffer, len - 4);
-		printf("CRC result  %x\n", crc_res);
+		//printf("CRC result  %x\n", crc_res);
 		u32 data_crc = (((u32)tmp_buffer[len - 4]) << 24) | (((u32)tmp_buffer[len - 3]) << 16) | (((u32)tmp_buffer[len - 2]) << 8) | (((u32)tmp_buffer[len - 1]));
 		if (crc_res != data_crc)
 		{
@@ -1258,7 +1313,7 @@ u8 parse_cmd(CMD_STRUCT *command)
 			(cmd_s.function_code == 11) || (cmd_s.function_code == 12) || (cmd_s.function_code == 13)|| (cmd_s.function_code == 14))
 		{
 			work_model=0;
-			printf("control frame, function code  %d\n", cmd_s.function_code);
+			//printf("control frame, function code  %d\n", cmd_s.function_code);
 			cmd_s.cmd_type = 3;
 			cmd_s.target_motor = 0;
 			switch (cmd_s.function_code)
@@ -1286,7 +1341,7 @@ u8 parse_cmd(CMD_STRUCT *command)
 				}
 				if (cmd_s.target_motor > 15)
 				{
-					printf("warning too much motor, enable 1 to 4 motor already\n");
+					//printf("warning too much motor, enable 1 to 4 motor already\n");
 				}
 				return_completed();
 				break;
@@ -1349,11 +1404,11 @@ u8 parse_cmd(CMD_STRUCT *command)
 				u8 tpid = tmp_buffer[5];
 				if (tpid > 4)
 				{
-					printf("motor id error\n");
+					//printf("motor id error\n");
 				}
 				else
 				{
-					printf("rel position, cmd13\n");
+					//printf("rel position, cmd13\n");
 					int32_t tpdata = 0;
 					tpdata = (((int32_t)tmp_buffer[6]) << 24) | (((int32_t)tmp_buffer[7]) << 16) | (((int32_t)tmp_buffer[8]) << 8) | (((int32_t)tmp_buffer[9]));
 					SCA_Handler_t *pSCA = NULL;
@@ -1379,11 +1434,11 @@ u8 parse_cmd(CMD_STRUCT *command)
 				u8 tpid = tmp_buffer[5];
 				if (tpid > 4)
 				{
-					printf("motor id error\n");
+					//printf("motor id error\n");
 				}
 				else
 				{
-					printf("abs position, cmd1\n");
+					//printf("abs position, cmd1\n");
 					int32_t tpdata = 0;
 					tpdata = (((int32_t)tmp_buffer[6]) << 24) | (((int32_t)tmp_buffer[7]) << 16) | (((int32_t)tmp_buffer[8]) << 8) | (((int32_t)tmp_buffer[9]));
 					SCA_Handler_t *pSCA = NULL;
@@ -1407,7 +1462,7 @@ u8 parse_cmd(CMD_STRUCT *command)
 			}
 			case 2:
 			{
-				printf("cmd 2, speed cmd\n");
+				//printf("cmd 2, speed cmd\n");
 				int32_t tpdata = 0;
 				tpdata = (((int32_t)tmp_buffer[6]) << 24) | (((int32_t)tmp_buffer[7]) << 16) | (((int32_t)tmp_buffer[8]) << 8) | (((int32_t)tmp_buffer[9]));
 				u8 tpid = tmp_buffer[5];
@@ -1428,7 +1483,7 @@ u8 parse_cmd(CMD_STRUCT *command)
 			}
 			case 3:
 			{
-				printf("cmd 3, relative position cmd\n");
+				//printf("cmd 3, relative position cmd\n");
 				float a1, a2, a3, a4;
 				position_2_angle(&a1, &a2, &a3, &a4);
 				t4angle = a2 + a3 + a4;
@@ -1643,10 +1698,10 @@ int main(void)
 
 	TIM2_init(100 - 1, 9000 - 1);
 
-	TIM_init(50 - 1, 9000 - 1, 3);
-	TIM_init(50 - 1, 9000 - 1, 4);
-	TIM_init(50 - 1, 9000 - 1, 13);
-	TIM_init(50 - 1, 9000 - 1, 14);
+	TIM_init(200 - 1, 9000 - 1, 3);
+	TIM_init(200 - 1, 9000 - 1, 4);
+	TIM_init(200 - 1, 9000 - 1, 13);
+	TIM_init(200 - 1, 9000 - 1, 14);
 	TIM_init(600 - 1, 9000 - 1, 6);
 
 	//TIM_Cmd(TIM6, ENABLE);
